@@ -20,6 +20,7 @@ elif platform == 'darwin':
     import pync # macOS notifications 
 import requests # for IFTTT integration to send webhook
 import gdshortener # shorten URLs using is.gd 
+import wget # download images
 
 # === start + run time ===
 
@@ -56,7 +57,7 @@ if not os.path.isdir("output/" + this_run_datetime):
 
 # page_url = "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/"
 page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/"
-# *NOTE: location is used for IFTTT function 
+# TODO: location is used for IFTTT function - can remove
 # location = "" 
 
 # === shorten the URL === 
@@ -78,11 +79,8 @@ print("Page URL:", page_url_shortened[0]) # [0] to get the first element from tu
 # event_name = 'new-car' # TODO: change to new-offer
 # webhook_url = f'https://maker.ifttt.com/trigger/{event_name}/with/key/{ifttt_maker_key}'
 
-# def run_ifttt_automation(url, date, location):
-#     report = {}
-#     report["value1"] = url
-#     report["value2"] = date
-#     report["value3"] = location
+# def run_ifttt_automation(url, date, location): # TODO: remove location - not needed
+#     report = {"value1": url, "value2": date, "value3": location}
 #     requests.post(webhook_url, data=report)
 
 # === pimp Windows 10 notification === 
@@ -103,7 +101,7 @@ def pullData(page_url):
     pause_duration = 2 # seconds to wait
     print("Waiting for", pause_duration, "seconds before opening URL...")
     with alive_bar(pause_duration, bar="circles", spinner="dots_waves") as bar:
-        for second in range(0, pause_duration):
+        for _ in range(pause_duration):
             time.sleep(1)
             bar()
 
@@ -117,14 +115,31 @@ def pullData(page_url):
     # 'a' (append) to add lines to existing file vs overwriting
     with open(r"output/" + this_run_datetime + "/1-output.txt", "a", encoding="utf-8") as bs_output:
         # print (colored("Creating local file to store URLs...", 'green')) # colored text on Windows
-        counter = 0 # counter to get # of URLs/images
+        
+        counter = 0 # counter to get # of URLs
+        counter1 = 0 # counter to get # of URLs/images
         with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
-            for link in soup.find_all("img", {"class": "fleft"}):
-                bs_output.write(link.get('src'))
+            for link in soup.find_all("a", class_="thumb"):
+                bs_output.write(link.get('href'))
                 counter += 1 # counter ++
-                bar() # progress bar ++
+                images = link.findChildren("img", class_="fleft")
+                for image in images:
+                    bs_output.write(image.get('src'))
+                    counter1 += 1 # counter ++
                 # print ("Adding", counter, "URL to file...")
-        print("Successfully added", counter, "images to file.")
+                bar() # progress bar ++
+        print("Successfully added", counter, "URLs to file.")
+
+        # counter = 0 # counter to get # of URLs/images
+        # with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
+        #     for link in soup.find_all("img", class_="fleft"):
+        #         bs_output.write(link.get('src'))
+        #         counter += 1 # counter ++
+        #         bar() # progress bar ++
+        #         # print ("Adding", counter, "URL to file...")
+        # print("Successfully added", counter, "images to file.")
+
+        
 
 # === get the number# of search results pages & run URLs in function ^ ===
 
@@ -165,91 +180,107 @@ with open(r"output/" + this_run_datetime + "/1-output.txt", "r", encoding="utf-8
     print("Reading file to clean up...")
     read_scraping_output_file = scraping_output_file.read() # ... and read it
 
-# urls_line_by_line = re.sub(r"#[a-zA-Z0-9]+(?!https$)://|https://|#[a-zA-Z0-9]+", "\n", read_scraping_output_file) # add new lines; remove IDs at the end of URL, eg '#e5c6831089'
-urls_line_by_line = re.sub(r"461", "461\n", read_scraping_output_file) # add new lines; remove IDs at the end of URL, eg '#e5c6831089'
+urls_line_by_line = re.sub(r"#[a-zA-Z0-9]+(?!https$)://|#[a-zA-Z0-9]+|;promoted", "\n", read_scraping_output_file) # add new lines; remove IDs at the end of URL, eg '#e5c6831089'
+urls_line_by_line = re.sub(r"461", "461\n", urls_line_by_line) # find & replace
+urls_line_by_line = re.sub(r"html\?", "html\n", urls_line_by_line) # find & replace
 
-# urls_line_by_line = urls_line_by_line.replace("644x461", "https://") # make text clickable again
+urls_line_by_line = urls_line_by_line.replace("ireland.", "https://ireland.") # make text clickable again
+urls_line_by_line = urls_line_by_line.replace("www", "https://www") # make text clickable again
+urls_line_by_line = urls_line_by_line.replace("https://https://", "https://") # make text clickable again
 
 print("Cleaning the file...")
 
-# === switch to a list to remove duplicates & sort === 
+# === remove duplicates & sort === 
 
 imageList = urls_line_by_line.split() # remove "\n"; add to list
-uniqueimageList = list(set(imageList)) # remove duplicates 
-print(f'There are {len(uniqueimageList)} images in total.') # *NOTE: offers/images
+# uniqueimageList = list(set(imageList)) # remove duplicates 
+# print(f'There are {len(imageList)/2} images in total.') # *NOTE: offers/images
+
+# print(imageList) # debug
+print(f'Before removing duplicates: {len(imageList)}')  
+# print(imageList[0]) # debug 
+# print(imageList[1]) # debug 
+
+sortedImageList = list(dict.fromkeys(imageList)) # sort without changing the order
+# print(sortedImageList) # debug 
+print(f'After removing duplicates: {len(sortedImageList)}') 
+# print(sortedImageList[0]) # debug 
+# print(sortedImageList[1]) # debug 
 
 print("File cleaned up. New lines added.")
 
 with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8") as clean_file:
-    for element in sorted(uniqueimageList): # sort URLs
+    # for element in sorted(uniqueimageList): # sort URLs
+    # for element in uniqueimageList: # sort URLs
+    for element in imageList: # sort URLs
         clean_file.write("%s\n" % element) # write to file
 
 # === tailor the results by using a keyword: brand, model (possibly also engine size etc) === 
 # TODO: mostly broken as of 0.9; core works 
 
 # regex_user_input = input("Jak chcesz zawęzić wyniki? Możesz wpisać markę (np. BMW) albo model (np. E39) >>> ") # for now using brand as quesion but user can put any one-word keyword
-regex_user_input = ""
-if len(regex_user_input) == 0:
-    print("Keyword wasn't provided - not searching.")
-else: 
-    regex_user_input = regex_user_input.strip() # strip front & back
-    print("Opening file to search for keyword:", regex_user_input)
-    reg = re.compile(regex_user_input) # matches "KEYWORD" in lines
-    counter2 = 0 # another counter to get the # of search results
-    with open(r'output/' + this_run_datetime + '/3-search_keyword.txt', 'w') as output: # open file for writing
-        print("Searching for keyword...")
-        with open(r'output/' + this_run_datetime + '/2-clean.txt', 'r', encoding='UTF-8') as clean_no_dupes_file: # look for keyword in the clean file without empty lines and duplicates 
-            with alive_bar(bar="circles", spinner="dots_waves") as bar:
-                for line in clean_no_dupes_file: # read file line by line
-                    if reg.search(line): # if there is a match anywhere in a line
-                        output.write(line) # write the line into the new file
-                        counter2 += 1 # counter ++
-                        bar() # progress bar ++
-                        # print ("Progress:", counter2)
-            if counter2 == 1:
-                print("Found", counter2, "result.")
-                # if platform == "win32":
-                #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
-                #                        " result.",  icon_path="icons/www.ico", duration=None)
-            else:
-                print("Found", counter2, "results.")
-                # if platform == "win32":
-                #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
-                #                        " results.",  icon_path="icons/www.ico", duration=None)
+# regex_user_input = ""
+# if len(regex_user_input) == 0:
+#     print("Keyword wasn't provided - not searching.")
+# else: 
+#     regex_user_input = regex_user_input.strip() # strip front & back
+#     print("Opening file to search for keyword:", regex_user_input)
+#     reg = re.compile(regex_user_input) # matches "KEYWORD" in lines
+#     counter2 = 0 # another counter to get the # of search results
+#     with open(r'output/' + this_run_datetime + '/3-search_keyword.txt', 'w') as output: # open file for writing
+#         print("Searching for keyword...")
+#         with open(r'output/' + this_run_datetime + '/2-clean.txt', 'r', encoding='UTF-8') as clean_no_dupes_file: # look for keyword in the clean file without empty lines and duplicates 
+#             with alive_bar(bar="circles", spinner="dots_waves") as bar:
+#                 for line in clean_no_dupes_file: # read file line by line
+#                     if reg.search(line): # if there is a match anywhere in a line
+#                         output.write(line) # write the line into the new file
+#                         counter2 += 1 # counter ++
+#                         bar() # progress bar ++
+#                         # print ("Progress:", counter2)
+#             if counter2 == 1:
+#                 print("Found", counter2, "result.")
+#                 # if platform == "win32":
+#                 #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
+#                 #                        " result.",  icon_path="icons/www.ico", duration=None)
+#             else:
+#                 print("Found", counter2, "results.")
+#                 # if platform == "win32":
+#                 #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
+#                 #                        " results.",  icon_path="icons/www.ico", duration=None)
+# # === open keyword/search results ^ in browser ===
 
-# === open keyword/search results ^ in browser ===
+#     if counter2 == 0:
+#         print("No search results found.")
 
-    if counter2 != 0:
-        # user_choice_open_urls = input("Chcesz otworzyć linki w przeglądarce? [y/n] >>> ")
-        user_choice_open_urls = 'n'
-        if user_choice_open_urls == 'y':
-            with open("output/" + this_run_datetime + "/3-search_keyword.txt", 'r', encoding='UTF-8') as search_results:
-                counter3 = 0
-                print("Opening URLs in browser...")
-                with alive_bar(bar="circles", spinner="dots_waves") as bar:
-                    for line in search_results: # go through the file
-                        webbrowser.open(line) # open URL in browser
-                        counter3 += 1
-                        bar()
-            if counter3 != 1: # correct grammar for multiple (URLs; them; they)
-                print("Opened ", str(counter3),
-                    " URLs in the browser. Go and check them before they go 404 ;)")
-                # if platform == "win32":
-                #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
-                #                        " URLs.",  icon_path="icons/www.ico", duration=None)
-            else: # correct grammar for 1 (URL; it)
-                print("Opened", counter3,
-                    "URL in the browser. Go and check it before it goes 404 ;)")
-                # if platform == "win32":
-                #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
-                #                        " URL.",  icon_path="icons/www.ico", duration=None)
-        else:
-            # print ("Ok - URLs saved in 'output/search-output.txt' anyway.")
-            print("Ok - URLs saved to a file.")
-            # print("Script run time:", datetime.now()-start)
-            # sys.exit()
-    else:
-        print("No search results found.")
+#     else:
+#         # user_choice_open_urls = input("Chcesz otworzyć linki w przeglądarce? [y/n] >>> ")
+#         user_choice_open_urls = 'n'
+#         if user_choice_open_urls == 'y':
+#             with open("output/" + this_run_datetime + "/3-search_keyword.txt", 'r', encoding='UTF-8') as search_results:
+#                 counter3 = 0
+#                 print("Opening URLs in browser...")
+#                 with alive_bar(bar="circles", spinner="dots_waves") as bar:
+#                     for line in search_results: # go through the file
+#                         webbrowser.open(line) # open URL in browser
+#                         counter3 += 1
+#                         bar()
+#             if counter3 != 1: # correct grammar for multiple (URLs; them; they)
+#                 print("Opened ", str(counter3),
+#                     " URLs in the browser. Go and check them before they go 404 ;)")
+#                 # if platform == "win32":
+#                 #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
+#                 #                        " URLs.",  icon_path="icons/www.ico", duration=None)
+#             else: # correct grammar for 1 (URL; it)
+#                 print("Opened", counter3,
+#                     "URL in the browser. Go and check it before it goes 404 ;)")
+#                 # if platform == "win32":
+#                 #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
+#                 #                        " URL.",  icon_path="icons/www.ico", duration=None)
+#         else:
+#             # print ("Ok - URLs saved in 'output/search-output.txt' anyway.")
+#             print("Ok - URLs saved to a file.")
+#             # print("Script run time:", datetime.now()-start)
+#             # sys.exit()
 
 # === compare files === 
 
@@ -269,13 +300,7 @@ except NameError:
         diff1 = [line for line in f2 if line not in f1] # lines present only in 2nd file 
         # *NOTE file2 must be > file1
 
-        if len(diff1) == 0: # check if set is empty - if it is then there are no differences between files 
-            print('Files are the same.')
-            # if platform == "darwin":
-            #         pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
-            # elif platform == "win32":
-            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-        else:
+        if diff1:
             with open('output/diff/diff-' + this_run_datetime + '.txt', 'w') as w:
                 counter4 = 0 # counter 
                 with alive_bar(bar="circles", spinner="dots_waves") as bar:
@@ -299,7 +324,13 @@ except NameError:
                 #     toaster.show_toast(title="OTOMOTO", msg=f'Nowe auta: {counter4}', icon_path="../icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
                     # time.sleep(5)
                     # webbrowser.open(page_url)
-                
+
+        else: # check if set is empty - if it is then there are no differences between files 
+            print('Files are the same.')
+            # if platform == "darwin":
+            #         pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
+            # elif platform == "win32":
+            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
     except IOError:
         print("No previous data - can't diff.")
 

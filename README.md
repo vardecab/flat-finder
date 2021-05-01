@@ -32,7 +32,7 @@ Add ^ to Automator, export as Application and then run in the background via Scr
 
 ## Release History
 
-<!-- - 0.1.1:  -->
+- 0.2: Getting offer URL + offer's main image URL.
 - 0.1: Initial release.
 
 ## Versioning
