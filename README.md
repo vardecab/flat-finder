@@ -32,7 +32,8 @@ Add ^ to Automator, export as Application and then run in the background via Scr
 
 ## Release History
 
-- 0.2: Getting offer URL + offer's main image URL.
+- 0.3: Downloading offers' main images'.
+- 0.2: Getting offers' URLs + offers' main images' URLs.
 - 0.1: Initial release.
 
 ## Versioning

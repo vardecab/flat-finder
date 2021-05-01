@@ -121,14 +121,15 @@ def pullData(page_url):
         with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
             for link in soup.find_all("a", class_="thumb"):
                 bs_output.write(link.get('href'))
-                counter += 1 # counter ++
                 images = link.findChildren("img", class_="fleft")
                 for image in images:
                     bs_output.write(image.get('src'))
                     counter1 += 1 # counter ++
                 # print ("Adding", counter, "URL to file...")
                 bar() # progress bar ++
-        print("Successfully added", counter, "URLs to file.")
+                counter += 1 # counter ++
+        print("Successfully added", counter, "offers to the file.")
+        print("Successfully added", counter1, "images to the file.")
 
         # counter = 0 # counter to get # of URLs/images
         # with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
@@ -197,13 +198,13 @@ imageList = urls_line_by_line.split() # remove "\n"; add to list
 # print(f'There are {len(imageList)/2} images in total.') # *NOTE: offers/images
 
 # print(imageList) # debug
-print(f'Before removing duplicates: {len(imageList)}')  
+# print(f'Before removing duplicates: {len(imageList)}')  
 # print(imageList[0]) # debug 
 # print(imageList[1]) # debug 
 
 sortedImageList = list(dict.fromkeys(imageList)) # sort without changing the order
 # print(sortedImageList) # debug 
-print(f'After removing duplicates: {len(sortedImageList)}') 
+# print(f'After removing duplicates: {len(sortedImageList)}') 
 # print(sortedImageList[0]) # debug 
 # print(sortedImageList[1]) # debug 
 
@@ -281,6 +282,40 @@ with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8"
 #             print("Ok - URLs saved to a file.")
 #             # print("Script run time:", datetime.now()-start)
 #             # sys.exit()
+
+# === download images === 
+counter5 = 0 
+with alive_bar(bar="circles", spinner="dots_waves") as bar:
+    for image in imageList:
+        try: 
+            imageURL = imageList[counter5]
+            try:
+                downloadedImage = wget.download(imageURL, out='images/') # download image
+            except: # 404
+                pass # ignore the error (most likely 404) and move on
+            # print(f'Image downloaded: {downloadedImage}')
+            try: 
+                os.rename('images/image', 'images/image' + str(counter5) + '.jpg') # rename files to .jph
+            except: # wrong filename 
+                pass # ignore the error (most likely 404) and move on
+            bar()
+            counter5 += 1 
+        except IndexError: # if counter > len(imageList)
+            continue
+
+# remove .html files so we only have .jpg
+# folderImages = "images/"
+folderImages = os.listdir("images/")
+for website in folderImages:
+    if website.endswith(".html"):
+        os.remove(os.path.join("images/", website))
+
+# remove .tmp files from main folder
+# folderImages = "images/"
+folderMain = os.listdir("./")
+for temps in folderMain:
+    if temps.endswith(".tmp"):
+        os.remove(os.path.join("./", temps))
 
 # === compare files === 
 
