@@ -16,6 +16,7 @@
 
 ## Release History
 
+- 0.8: Enabled Windows 10 & macOS notifications when new offers are found.
 - 0.7: Downloading images to unique folders. Added data comparison logic to show which offers are new vs previous script run.
 - 0.6: Adding only "modern" offers to a text file. Changed local images renaming logic.
 - 0.5: Started to build some `if/else` logic for when offer is modern/ancient. 
@@ -57,7 +58,7 @@ Using [SemVer](http://semver.org/).
 
 ### Other
 - Images used to train the model were downloaded from Google Images. Respective licenses apply.
-<!-- - [Flaticon / Freepik](https://www.flaticon.com/) -->
+- [Flaticon / Freepik](https://www.flaticon.com/)
 - [IFTTT](https://ifttt.com/) 
 - [Connect a Python Script to IFTTT by Enrico Bergamini](https://medium.com/mai-piu-senza/connect-a-python-script-to-ifttt-8ee0240bb3aa)
 - [Use IFTTT web requests to send email alerts by Anthony Hartup](https://anthscomputercave.com/tutorials/ifttt/using_ifttt_web_request_email.html)

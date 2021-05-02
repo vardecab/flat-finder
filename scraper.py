@@ -190,26 +190,30 @@ def pullData(page_url):
 #     print("Nothing to clean, moving on...")
 # # *NOTE 2/2: ^
 
+# === pagination support ===
 # page = urlopen(page_url, context=ssl.create_default_context(cafile=certifi.where())) # fix certificate issue; open URL
 # soup = BeautifulSoup(page, 'html.parser') # parse the page
-
-# number_of_pages_to_crawl = ([item.get_text(strip=True) for item in soup.select("span.page")]) # get page numbers from the bottom of the page
-# # print(len(number_of_pages_to_crawl)) # debug; 0 = empty
-# if len(number_of_pages_to_crawl) > 0:
-#     number_of_pages_to_crawl = int(number_of_pages_to_crawl[-1]) # get the last element from the list ^ to get the the max page # and convert to int 
-# else: 
+# # number_of_pages_to_crawl = ([item.get_text(strip=True) for item in soup.select("a", {"data-cy":"page-link-last"})]) # get page numbers from the bottom of the page
+# html_content = soup.body.find('a', attrs={'data-cy': 'page-link-last'})
+# # print(html_content)
+# number_of_pages_to_crawl = re.search('<span>(.*?)</span>', str(html_content))
+# try: # if there is only 1 page
+#     number_of_pages_to_crawl = int(number_of_pages_to_crawl.group(1))
+# except AttributeError:
 #     number_of_pages_to_crawl = 1
+# # print(number_of_pages_to_crawl) # debug 
+# # number_of_pages_to_crawl = int(number_of_pages_to_crawl[-1]) # get the last element from the list ^ to get the the max page # and convert to int 
 # print('How many pages are there to crawl?', number_of_pages_to_crawl)
 
 # page_prefix = '&page='
 # page_number = 1 # begin at page=1
-# # for page in range(1, number_of_pages_to_crawl+1):
+# # for page in range(page_number, number_of_pages_to_crawl):
 # while page_number <= number_of_pages_to_crawl:
-#     print("Page number:", page_number, "/",
-#           number_of_pages_to_crawl) 
+#     print("Page number:", page_number, "/", number_of_pages_to_crawl) 
 #     full_page_url = f"{page_url}{page_prefix}{page_number}"
 #     pullData(full_page_url) # throw URL to function
 #     page_number += 1 # go to next page
+# pullData(page_url) # throw URL to function
 
 # %%
 pullData(page_url) # throw URL to function
@@ -696,26 +700,26 @@ try:
                     bar()
                     counter4 += 1 # counter++
         if counter4 <= 0: # should not fire 
-            print ('No new offers since last run.') # *NOTE: offers/images
+            print ('No new apartments since last run.') 
             # if platform == "darwin":
-            #     pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
+            #     pync.notify('Nie ma nowych mieszkań.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
             # elif platform == "win32":
-            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych mieszkań.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
         else:
-            print (counter4, "new offers found since last run! Go check them now!") # *NOTE: offers/images
-            # if platform == "darwin":
-            #     pync.notify(f'Nowe auta: {counter4}', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
-            # elif platform == "win32":
-            #     toaster.show_toast(title="OTOMOTO", msg=f'Nowe auta: {counter4}', icon_path="../icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+            print (counter4, "new apartments found since last run! Go check them now!") 
+            if platform == "darwin":
+                pync.notify(f'Nowe mieszkania: {counter4}', title='OLX', open=page_url, contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
+            elif platform == "win32":
+                toaster.show_toast(title="OLX", msg=f'Nowe mieszkania: {counter4}', icon_path="./icons/apartment.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
                 # time.sleep(5)
                 # webbrowser.open(page_url)
 
     else: # check if set is empty - if it is then there are no differences between files 
         print('Files are the same.')
         # if platform == "darwin":
-        #         pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
+        #         pync.notify('Nie ma nowych mieszkań.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
         # elif platform == "win32":
-        #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+        #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych mieszkań.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
 except IOError:
     print("No previous data - can't diff.")
 
