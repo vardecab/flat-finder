@@ -16,6 +16,7 @@
 
 ## Release History
 
+- 0.6: Adding only "modern" offers to a text file. Changed local images renaming logic.
 - 0.5: Started to build some `if/else` logic for when offer is modern/ancient. 
 - 0.4: Added v1 of AI model to assess which offer shows new ("modern") and which old ("ancient") apartments.
 - 0.3: Downloading offers' main images'.

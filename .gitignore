@@ -21,6 +21,7 @@ fastai
 data
 saved_model
 tensorflow
+scraper.ipynb
 
 # images
 images/*.jpg

@@ -1,3 +1,4 @@
+# %%
 # === import libs ===
 
 import pickle # store data
@@ -22,6 +23,7 @@ import requests # for IFTTT integration to send webhook
 import gdshortener # shorten URLs using is.gd 
 import wget # download images
 
+# %%
 # === import TensorFlow & related libs === 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,11 +33,13 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
+# %%
 # === start + run time ===
 
 start_time = time.time() # run time start
 print("Starting...")
 
+# %%
 # === have current date & time in exported files' names ===
 
 # https://www.w3schools.com/python/python_datetime.asp
@@ -57,11 +61,13 @@ try:
 except IOError:
     print("File doesn't exist.")
 
+# %%
 # create new folder
 if not os.path.isdir("output/" + this_run_datetime):
     os.mkdir("output/" + this_run_datetime) # eg 210120-173112
     print("Folder created:", this_run_datetime)
 
+# %%
 # === URL to scrape ===
 
 # page_url = "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/"
@@ -69,12 +75,14 @@ page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/"
 # TODO: location is used for IFTTT function - can remove
 # location = "" 
 
+# %%
 # === shorten the URL === 
 
 isgd = gdshortener.ISGDShortener() # initialize
 page_url_shortened = isgd.shorten(page_url) # shorten URL; result is in tuple
 print("Page URL:", page_url_shortened[0]) # [0] to get the first element from tuple
 
+# %%
 # === IFTTT automation === 
 
 # file_saved_imk = '/data/imk.pk'
@@ -92,6 +100,7 @@ print("Page URL:", page_url_shortened[0]) # [0] to get the first element from tu
 #     report = {"value1": url, "value2": date, "value3": location}
 #     requests.post(webhook_url, data=report)
 
+# %%
 # === pimp Windows 10 notification === 
 
 # https://stackoverflow.com/questions/63867448/interactive-notification-windows-10-using-python
@@ -102,10 +111,12 @@ def open_url():
     except: 
         print('Failed to open search results. Unsupported variable type.')
     
+# %%
 # === function to scrape data ===
 
 def pullData(page_url):
 
+    # %%
     # ? can't crawl too often? works better with OTOMOTO limits perhaps
     pause_duration = 2 # seconds to wait
     print("Waiting for", pause_duration, "seconds before opening URL...")
@@ -114,17 +125,21 @@ def pullData(page_url):
             time.sleep(1)
             bar()
 
+    # %%
     print("Opening page...")
     # print (page_url) # debug 
     page = urlopen(page_url, context=ssl.create_default_context(cafile=certifi.where())) # fix certificate issue
 
+    # %%
     print("Scraping page...")
     soup = BeautifulSoup(page, 'html.parser') # parse the page
 
+    # %%
     # 'a' (append) to add lines to existing file vs overwriting
     with open(r"output/" + this_run_datetime + "/1-output.txt", "a", encoding="utf-8") as bs_output:
         # print (colored("Creating local file to store URLs...", 'green')) # colored text on Windows
         
+        # %%
         counter = 0 # counter to get # of URLs
         counter1 = 0 # counter to get # of URLs/images
         with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
@@ -150,7 +165,7 @@ def pullData(page_url):
         # print("Successfully added", counter, "images to file.")
 
         
-
+# %%
 # === get the number# of search results pages & run URLs in function ^ ===
 
 # # *NOTE 1/2: perhaps no longer needed as of 0.10? 
@@ -182,26 +197,33 @@ def pullData(page_url):
 #     pullData(full_page_url) # throw URL to function
 #     page_number += 1 # go to next page
 
+# %%
 pullData(page_url) # throw URL to function
 
+# %%
 # === make file more pretty by adding new lines ===
 
 with open(r"output/" + this_run_datetime + "/1-output.txt", "r", encoding="utf-8") as scraping_output_file: # open file...
     print("Reading file to clean up...")
     read_scraping_output_file = scraping_output_file.read() # ... and read it
 
+# %%
 urls_line_by_line = re.sub(r"#[a-zA-Z0-9]+(?!https$)://|#[a-zA-Z0-9]+|;promoted", "\n", read_scraping_output_file) # add new lines; remove IDs at the end of URL, eg '#e5c6831089'
 urls_line_by_line = re.sub(r"461", "461\n", urls_line_by_line) # find & replace
 urls_line_by_line = re.sub(r"html\?", "html\n", urls_line_by_line) # find & replace
 
+# %%
 urls_line_by_line = urls_line_by_line.replace("ireland.", "https://ireland.") # make text clickable again
 urls_line_by_line = urls_line_by_line.replace("www", "https://www") # make text clickable again
 urls_line_by_line = urls_line_by_line.replace("https://https://", "https://") # make text clickable again
 
+# %%
 print("Cleaning the file...")
 
+# %%
 # === remove duplicates & sort === 
 
+# %%
 imageList = urls_line_by_line.split() # remove "\n"; add to list
 # uniqueimageList = list(set(imageList)) # remove duplicates 
 # print(f'There are {len(imageList)/2} images in total.') # *NOTE: offers/images
@@ -211,20 +233,24 @@ imageList = urls_line_by_line.split() # remove "\n"; add to list
 # print(imageList[0]) # debug 
 # print(imageList[1]) # debug 
 
+# %%
 sortedImageList = list(dict.fromkeys(imageList)) # sort without changing the order
+# TODO: use this somewhere? 
 # print(sortedImageList) # debug 
 # print(f'After removing duplicates: {len(sortedImageList)}') 
 # print(sortedImageList[0]) # debug 
 # print(sortedImageList[1]) # debug 
 
+# %%
 print("File cleaned up. New lines added.")
 
 with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8") as clean_file:
     # for element in sorted(uniqueimageList): # sort URLs
     # for element in uniqueimageList: # sort URLs
-    for element in imageList: # sort URLs
+    for element in imageList: 
         clean_file.write("%s\n" % element) # write to file
 
+# %%
 # === tailor the results by using a keyword: brand, model (possibly also engine size etc) === 
 # TODO: mostly broken as of 0.9; core works 
 
@@ -292,6 +318,7 @@ with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8"
 #             # print("Script run time:", datetime.now()-start)
 #             # sys.exit()
 
+# %%
 # === download images === 
 counter5 = 1 # images start at list[1] 
 with alive_bar(bar="circles", spinner="dots_waves") as bar:
@@ -300,12 +327,15 @@ with alive_bar(bar="circles", spinner="dots_waves") as bar:
             imageURL = imageList[counter5]
             try:
                 downloadedImage = wget.download(imageURL, out='images/') # download image
+                counter7 = imageList.index(imageURL) # get item's list index 
+                print(f'Index ID: {counter7}')
             except: # 404
                 pass # ignore the error (most likely 404) and move on
             # print(f'Image downloaded: {downloadedImage}')
             try: 
-                os.rename('images/image', 'images/image' + str(counter5) + '.jpg') # rename files to .jpg
+                os.rename('images/image', 'images/image' + str(counter7) + '.jpg') # rename files to .jpg
                 # TODO: rename image to image.jpg or remove
+                # !FIX: rename but with imageList indexes to keep the order
             except: # wrong filename 
                 pass # ignore the error (most likely 404) and move on
             bar()
@@ -313,6 +343,7 @@ with alive_bar(bar="circles", spinner="dots_waves") as bar:
         except IndexError: # if counter > len(imageList)
             continue
 
+# %%
 # remove .html files so we only have .jpg
 # folderImages = "images/"
 folderImages = os.listdir("images/")
@@ -320,6 +351,13 @@ for website in folderImages:
     if website.endswith(".html"):
         os.remove(os.path.join("images/", website))
 
+# remove 'image' file in images/
+# folderImages = os.listdir("images/")
+# for imageFile in folderImages:
+#     if imageFile.endswith(""):
+#         os.remove(os.path.join("images/", imageFile))
+
+# %%
 # remove .tmp files from main folder
 # folderImages = "images/"
 folderMain = os.listdir("./")
@@ -327,6 +365,7 @@ for temps in folderMain:
     if temps.endswith(".tmp"):
         os.remove(os.path.join("./", temps))
 
+# %%
 # === compare files === 
 
 try:
@@ -383,8 +422,10 @@ else:
     print("Keyword was provided; search was successful.") 
     # TODO: same as above but with /[x]-search_keyword.txt
 
+# %%
 # === model magic ===
 
+# %%
 # === download/get images to train the model === 
 import pathlib
 # dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
@@ -670,40 +711,70 @@ epochs_range = range(epochs)
 
 # PIL.Image.open(r'#')
 
-counter = 1
+# counter = 1
 # PIL.Image.open('images/image' + str(counter) + '.jpg')
 
 
 # %%
-# try:
-img = keras.preprocessing.image.load_img(
-    'images/image' + str(counter) + '.jpg', target_size=(img_height, img_width)
-)
-img_array = keras.preprocessing.image.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0) # Create a batch
-# except # missing numbers in filenames
+path_folderWithImages = './images/' # TODO: date-specific folders for images
+# counter6 = 1
+try:
+    with os.scandir(path_folderWithImages) as folderWithImages: # 2-20x faster than listdir()
+    # for image in os.listdir(path_folderWithImages): # *NOTE: listdir() fragment
+        # TODO: progress bar?
+        for image in folderWithImages:
+        # if image.endswith(".jpg"): # *NOTE: listdir() fragment
+            if image.name.endswith(".jpg"):
+                # print(os.path.join(path_folderWithImages, image)) # *NOTE: listdir() fragment
+                # print(f'Classifying: {image}') # *NOTE: listdir() fragment
+                print(f'Classifying: {image.name}')
+                # image = os.path.join(path_folderWithImages, image) # *NOTE: listdir() fragment
+                imageNumber = re.search('[0-9]+', image.name) # get image ID 
+                imageNumber = imageNumber.group(0) # get 1st match
+                imageNumber = int(imageNumber) # convert to number
+                # print(f'Image ID: {imageNumber}') # debug
 
-# PIL.Image.show(img)
+                img = keras.preprocessing.image.load_img(image, target_size=(img_height, img_width))
+                img_array = keras.preprocessing.image.img_to_array(img)
+                img_array = tf.expand_dims(img_array, 0) # Create a batch
+                predictions = model.predict(img_array)
+                score = tf.nn.softmax(predictions[0])
 
-predictions = model.predict(img_array)
-score = tf.nn.softmax(predictions[0])
+                if class_names[np.argmax(score)] == 'modern':
+                    print("Modern. Accuracy: {:.2f}%.".format(100 * np.max(score)))
+                    print(f'Offer ID: {imageNumber-1} // Offer URL: {imageList[imageNumber-1]}')
+                    print(f'Image ID: {imageNumber} // Image URL: {imageList[imageNumber]}')
+                    with open(r"output/" + this_run_datetime + "/3-modern-offers_temp.txt", "a", encoding="utf-8") as modernOffers:
+                        modernOffers.write(imageList[imageNumber-1] + "\n")
+                        modernOffers.write(imageList[imageNumber] + "\n")
+                else:
+                    print("Ancient. Accuracy: {:.2f}%.".format(100 * np.max(score)))
+                    print("Let's move on.")
+                print("=== === ===")
+                # counter6 += 1
 
-print(class_names[np.argmax(score)]) # debug 
-if class_names[np.argmax(score)] == 'modern':
-    # TODO: magic
-    print('YAY')
-else:
-    # TODO: exit()
-    print('NAY')
-    
-print([imageList[counter]])
-print([imageList[counter-1]])
+except IndexError: # missing numbers in filenames
+    print("No more images to run.")
 
-print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
-    .format(class_names[np.argmax(score)], 100 * np.max(score))
-) 
+# remove ireland.apollo URLs (image ones)
+bad_words = ['apollo']
+with open(r"output/" + this_run_datetime + "/3-modern-offers_temp.txt", "r", encoding="utf-8") as oldfile, open(r"output/" + this_run_datetime + "/4-modern-offers_temp2.txt", 'w') as newfile:
+    for line in oldfile:
+        if not any(bad_word in line for bad_word in bad_words):
+            newfile.write(line)
 
+# remove duplicates 
+lines_seen = set() # holds lines already seen
+outfile = open(r"output/" + this_run_datetime + "/5-modern-offers.txt", "w", encoding="utf-8")
+for line in open(r"output/" + this_run_datetime + "/4-modern-offers_temp2.txt", 'r'):
+    if line not in lines_seen: # not a duplicate
+        outfile.write(line)
+        lines_seen.add(line)
+outfile.close()
+
+# TODO: compare this file with previous_date 
+
+# %%
 # === run time ===
 
 # run_time = datetime.now()-start
