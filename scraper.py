@@ -190,33 +190,32 @@ def pullData(page_url):
 #     print("Nothing to clean, moving on...")
 # # *NOTE 2/2: ^
 
+# %%
 # === pagination support ===
-# page = urlopen(page_url, context=ssl.create_default_context(cafile=certifi.where())) # fix certificate issue; open URL
-# soup = BeautifulSoup(page, 'html.parser') # parse the page
-# # number_of_pages_to_crawl = ([item.get_text(strip=True) for item in soup.select("a", {"data-cy":"page-link-last"})]) # get page numbers from the bottom of the page
-# html_content = soup.body.find('a', attrs={'data-cy': 'page-link-last'})
-# # print(html_content)
-# number_of_pages_to_crawl = re.search('<span>(.*?)</span>', str(html_content))
-# try: # if there is only 1 page
-#     number_of_pages_to_crawl = int(number_of_pages_to_crawl.group(1))
-# except AttributeError:
-#     number_of_pages_to_crawl = 1
-# # print(number_of_pages_to_crawl) # debug 
-# # number_of_pages_to_crawl = int(number_of_pages_to_crawl[-1]) # get the last element from the list ^ to get the the max page # and convert to int 
-# print('How many pages are there to crawl?', number_of_pages_to_crawl)
+# OLX
+page = urlopen(page_url, context=ssl.create_default_context(cafile=certifi.where())) # fix certificate issue; open URL
+soup = BeautifulSoup(page, 'html.parser') # parse the page
+html_content = soup.body.find('a', attrs={'data-cy': 'page-link-last'})
+number_of_pages_to_crawl = re.search('<span>(.*?)</span>', str(html_content)) # *NOTE: auto
+try: # if there is only 1 page
+    number_of_pages_to_crawl = int(number_of_pages_to_crawl.group(1))
+except AttributeError:
+    number_of_pages_to_crawl = 1
+number_of_pages_to_crawl = 3 # *NOTE: force manual
+print('How many pages are there to crawl?', number_of_pages_to_crawl)
 
-# page_prefix = '&page='
-# page_number = 1 # begin at page=1
-# # for page in range(page_number, number_of_pages_to_crawl):
-# while page_number <= number_of_pages_to_crawl:
-#     print("Page number:", page_number, "/", number_of_pages_to_crawl) 
-#     full_page_url = f"{page_url}{page_prefix}{page_number}"
-#     pullData(full_page_url) # throw URL to function
-#     page_number += 1 # go to next page
-# pullData(page_url) # throw URL to function
+page_prefix = '?&page='
+page_number = 1 # begin at page=1
+# for page in range(page_number, number_of_pages_to_crawl):
+while page_number <= number_of_pages_to_crawl:
+    print("Page number:", page_number, "/", number_of_pages_to_crawl) 
+    full_page_url = f"{page_url}{page_prefix}{page_number}"
+    pullData(full_page_url) # throw URL to function
+    page_number += 1 # go to next page
+pullData(page_url) # throw URL to function
 
 # %%
-pullData(page_url) # throw URL to function
+# pullData(page_url) # throw URL to function
 
 # %%
 # === make file more pretty by adding new lines ===

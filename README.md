@@ -16,6 +16,7 @@
 
 ## Release History
 
+- 0.9: Pagination support.
 - 0.8: Enabled Windows 10 & macOS notifications when new offers are found.
 - 0.7: Downloading images to unique folders. Added data comparison logic to show which offers are new vs previous script run.
 - 0.6: Adding only "modern" offers to a text file. Changed local images renaming logic.
