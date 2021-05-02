@@ -62,10 +62,24 @@ except IOError:
     print("File doesn't exist.")
 
 # %%
-# create new folder
+# === create new folders ===
+# output
+if not os.path.isdir("output"):
+    os.mkdir("output")
+    print(f"Folder created: output")
 if not os.path.isdir("output/" + this_run_datetime):
     os.mkdir("output/" + this_run_datetime) # eg 210120-173112
-    print("Folder created:", this_run_datetime)
+    print(f"Folder created: output/{this_run_datetime}")
+if not os.path.isdir("output/diff"):
+    os.mkdir("output/diff")
+    print(f"Folder created: output/diff")
+# images
+if not os.path.isdir("images"):
+    os.mkdir("images")
+    print(f"Folder created: images")
+if not os.path.isdir("images/" + this_run_datetime):
+    os.mkdir("images/" + this_run_datetime) # eg 210120-173112
+    print(f"Folder created: images/{this_run_datetime}")
 
 # %%
 # === URL to scrape ===
@@ -251,74 +265,6 @@ with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8"
         clean_file.write("%s\n" % element) # write to file
 
 # %%
-# === tailor the results by using a keyword: brand, model (possibly also engine size etc) === 
-# TODO: mostly broken as of 0.9; core works 
-
-# regex_user_input = input("Jak chcesz zawęzić wyniki? Możesz wpisać markę (np. BMW) albo model (np. E39) >>> ") # for now using brand as quesion but user can put any one-word keyword
-# regex_user_input = ""
-# if len(regex_user_input) == 0:
-#     print("Keyword wasn't provided - not searching.")
-# else: 
-#     regex_user_input = regex_user_input.strip() # strip front & back
-#     print("Opening file to search for keyword:", regex_user_input)
-#     reg = re.compile(regex_user_input) # matches "KEYWORD" in lines
-#     counter2 = 0 # another counter to get the # of search results
-#     with open(r'output/' + this_run_datetime + '/3-search_keyword.txt', 'w') as output: # open file for writing
-#         print("Searching for keyword...")
-#         with open(r'output/' + this_run_datetime + '/2-clean.txt', 'r', encoding='UTF-8') as clean_no_dupes_file: # look for keyword in the clean file without empty lines and duplicates 
-#             with alive_bar(bar="circles", spinner="dots_waves") as bar:
-#                 for line in clean_no_dupes_file: # read file line by line
-#                     if reg.search(line): # if there is a match anywhere in a line
-#                         output.write(line) # write the line into the new file
-#                         counter2 += 1 # counter ++
-#                         bar() # progress bar ++
-#                         # print ("Progress:", counter2)
-#             if counter2 == 1:
-#                 print("Found", counter2, "result.")
-#                 # if platform == "win32":
-#                 #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
-#                 #                        " result.",  icon_path="icons/www.ico", duration=None)
-#             else:
-#                 print("Found", counter2, "results.")
-#                 # if platform == "win32":
-#                 #     toaster.show_toast("otomoto-scraper", "Found " + str(counter2) +
-#                 #                        " results.",  icon_path="icons/www.ico", duration=None)
-# # === open keyword/search results ^ in browser ===
-
-#     if counter2 == 0:
-#         print("No search results found.")
-
-#     else:
-#         # user_choice_open_urls = input("Chcesz otworzyć linki w przeglądarce? [y/n] >>> ")
-#         user_choice_open_urls = 'n'
-#         if user_choice_open_urls == 'y':
-#             with open("output/" + this_run_datetime + "/3-search_keyword.txt", 'r', encoding='UTF-8') as search_results:
-#                 counter3 = 0
-#                 print("Opening URLs in browser...")
-#                 with alive_bar(bar="circles", spinner="dots_waves") as bar:
-#                     for line in search_results: # go through the file
-#                         webbrowser.open(line) # open URL in browser
-#                         counter3 += 1
-#                         bar()
-#             if counter3 != 1: # correct grammar for multiple (URLs; them; they)
-#                 print("Opened ", str(counter3),
-#                     " URLs in the browser. Go and check them before they go 404 ;)")
-#                 # if platform == "win32":
-#                 #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
-#                 #                        " URLs.",  icon_path="icons/www.ico", duration=None)
-#             else: # correct grammar for 1 (URL; it)
-#                 print("Opened", counter3,
-#                     "URL in the browser. Go and check it before it goes 404 ;)")
-#                 # if platform == "win32":
-#                 #     toaster.show_toast("otomoto-scraper", "Opened " + str(counter3) +
-#                 #                        " URL.",  icon_path="icons/www.ico", duration=None)
-#         else:
-#             # print ("Ok - URLs saved in 'output/search-output.txt' anyway.")
-#             print("Ok - URLs saved to a file.")
-#             # print("Script run time:", datetime.now()-start)
-#             # sys.exit()
-
-# %%
 # === download images === 
 counter5 = 1 # images start at list[1] 
 with alive_bar(bar="circles", spinner="dots_waves") as bar:
@@ -326,16 +272,15 @@ with alive_bar(bar="circles", spinner="dots_waves") as bar:
         try: 
             imageURL = imageList[counter5]
             try:
-                downloadedImage = wget.download(imageURL, out='images/') # download image
+                downloadedImage = wget.download(imageURL, out='images/' + this_run_datetime) # download image
                 counter7 = imageList.index(imageURL) # get item's list index 
                 print(f'Index ID: {counter7}')
             except: # 404
                 pass # ignore the error (most likely 404) and move on
             # print(f'Image downloaded: {downloadedImage}')
             try: 
-                os.rename('images/image', 'images/image' + str(counter7) + '.jpg') # rename files to .jpg
+                os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image' + str(counter7) + '.jpg') # rename files to .jpg
                 # TODO: rename image to image.jpg or remove
-                # !FIX: rename but with imageList indexes to keep the order
             except: # wrong filename 
                 pass # ignore the error (most likely 404) and move on
             bar()
@@ -344,12 +289,17 @@ with alive_bar(bar="circles", spinner="dots_waves") as bar:
             continue
 
 # %%
+# remove files 
+try: 
+    os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image.html') # rename 'image' file so it can be deleted
+except FileNotFoundError:
+    print("Can't find 'image' file.")
 # remove .html files so we only have .jpg
 # folderImages = "images/"
-folderImages = os.listdir("images/")
+folderImages = os.listdir('images/' + this_run_datetime)
 for website in folderImages:
     if website.endswith(".html"):
-        os.remove(os.path.join("images/", website))
+        os.remove(os.path.join('images/' + this_run_datetime, website))
 
 # remove 'image' file in images/
 # folderImages = os.listdir("images/")
@@ -364,63 +314,6 @@ folderMain = os.listdir("./")
 for temps in folderMain:
     if temps.endswith(".tmp"):
         os.remove(os.path.join("./", temps))
-
-# %%
-# === compare files === 
-
-try:
-    counter2
-except NameError:
-    print("Variable not defined. Keyword wasn't provided.") 
-
-    try:
-        file_previous_run = open('output/' + previous_run_datetime + '/2-clean.txt', 'r') # 1st file 
-        file_current_run = open('output/' + this_run_datetime + '/2-clean.txt', 'r') # 2nd file 
-
-        f1 = [x for x in file_previous_run.readlines()] # set with lines from 1st file  
-        f2 = [x for x in file_current_run.readlines()] # set with lines from 2nd file 
-
-        diff = [line for line in f1 if line not in f2] # lines present only in 1st file 
-        diff1 = [line for line in f2 if line not in f1] # lines present only in 2nd file 
-        # *NOTE file2 must be > file1
-
-        if diff1:
-            with open('output/diff/diff-' + this_run_datetime + '.txt', 'w') as w:
-                counter4 = 0 # counter 
-                with alive_bar(bar="circles", spinner="dots_waves") as bar:
-                    for url in diff1: # go piece by piece through the differences 
-                        w.write(url) # write to file
-                        # run_ifttt_automation(url, this_run_datetime, location) # run IFTTT automation with URL
-                        # print('Running IFTTT automation...')
-                        bar()
-                        counter4 += 1 # counter++
-            if counter4 <= 0: # should not fire 
-                print ('No new offers since last run.') # *NOTE: offers/images
-                # if platform == "darwin":
-                #     pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
-                # elif platform == "win32":
-                #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-            else:
-                print (counter4, "new offers found since last run! Go check them now!") # *NOTE: offers/images
-                # if platform == "darwin":
-                #     pync.notify(f'Nowe auta: {counter4}', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
-                # elif platform == "win32":
-                #     toaster.show_toast(title="OTOMOTO", msg=f'Nowe auta: {counter4}', icon_path="../icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-                    # time.sleep(5)
-                    # webbrowser.open(page_url)
-
-        else: # check if set is empty - if it is then there are no differences between files 
-            print('Files are the same.')
-            # if platform == "darwin":
-            #         pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
-            # elif platform == "win32":
-            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-    except IOError:
-        print("No previous data - can't diff.")
-
-else:
-    print("Keyword was provided; search was successful.") 
-    # TODO: same as above but with /[x]-search_keyword.txt
 
 # %%
 # === model magic ===
@@ -438,32 +331,31 @@ data_dir = pathlib.Path(data_dir)
 print('Folder location:', data_dir)
 
 # check number of images 
-count_check = 230+165 # TODO: automate
-image_count = len(list(data_dir.glob('*/*.jpg'))) # !FIX: doesn't work properly
-print(f"Image count: {image_count}/{count_check}")
+# count_check = 230+165 # TODO: automate
+# image_count = len(list(data_dir.glob('*/*.jpg'))) # !FIX: doesn't work properly
+# print(f"Image count: {image_count}/{count_check}")
 
 
 # %%
 # test data
 
-## ancient
-ancient = list(data_dir.glob('ancient/*'))
-PIL.Image.open(str(ancient[0])) # debug
+# ## ancient
+# ancient = list(data_dir.glob('ancient/*'))
+# PIL.Image.open(str(ancient[0])) # debug
 
 
-# %%
-PIL.Image.open(str(ancient[1])) # debug
+# # %%
+# PIL.Image.open(str(ancient[1])) # debug
 
 
-# %%
-## modern
-modern = list(data_dir.glob('modern/*'))
-PIL.Image.open(str(modern[0])) # debug
+# # %%
+# ## modern
+# modern = list(data_dir.glob('modern/*'))
+# PIL.Image.open(str(modern[0])) # debug
 
 
-# %%
-PIL.Image.open(str(modern[1])) # debug
-
+# # %%
+# PIL.Image.open(str(modern[1])) # debug
 
 # %%
 # === create a dataset from images === 
@@ -716,7 +608,7 @@ epochs_range = range(epochs)
 
 
 # %%
-path_folderWithImages = './images/' # TODO: date-specific folders for images
+path_folderWithImages = 'images/' + this_run_datetime + '/' # TODO: date-specific folders for images
 # counter6 = 1
 try:
     with os.scandir(path_folderWithImages) as folderWithImages: # 2-20x faster than listdir()
@@ -773,6 +665,63 @@ for line in open(r"output/" + this_run_datetime + "/4-modern-offers_temp2.txt", 
 outfile.close()
 
 # TODO: compare this file with previous_date 
+
+# %%
+# === compare files === 
+
+# try:
+#     counter2
+# except NameError:
+#     print("Variable not defined. Keyword wasn't provided.") 
+
+try:
+    file_previous_run = open('output/' + previous_run_datetime + '/5-modern-offers.txt', 'r') # 1st file 
+    file_current_run = open('output/' + this_run_datetime + '/5-modern-offers.txt', 'r') # 2nd file 
+
+    f1 = [x for x in file_previous_run.readlines()] # set with lines from 1st file  
+    f2 = [x for x in file_current_run.readlines()] # set with lines from 2nd file 
+
+    diff = [line for line in f1 if line not in f2] # lines present only in 1st file 
+    diff1 = [line for line in f2 if line not in f1] # lines present only in 2nd file 
+    # *NOTE file2 must be > file1
+
+    if diff1:
+        with open('output/diff/diff-' + this_run_datetime + '.txt', 'w') as w:
+            counter4 = 0 # counter 
+            with alive_bar(bar="circles", spinner="dots_waves") as bar:
+                for url in diff1: # go piece by piece through the differences 
+                    w.write(url) # write to file
+                    # run_ifttt_automation(url, this_run_datetime, location) # run IFTTT automation with URL
+                    # print('Running IFTTT automation...')
+                    bar()
+                    counter4 += 1 # counter++
+        if counter4 <= 0: # should not fire 
+            print ('No new offers since last run.') # *NOTE: offers/images
+            # if platform == "darwin":
+            #     pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
+            # elif platform == "win32":
+            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+        else:
+            print (counter4, "new offers found since last run! Go check them now!") # *NOTE: offers/images
+            # if platform == "darwin":
+            #     pync.notify(f'Nowe auta: {counter4}', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
+            # elif platform == "win32":
+            #     toaster.show_toast(title="OTOMOTO", msg=f'Nowe auta: {counter4}', icon_path="../icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+                # time.sleep(5)
+                # webbrowser.open(page_url)
+
+    else: # check if set is empty - if it is then there are no differences between files 
+        print('Files are the same.')
+        # if platform == "darwin":
+        #         pync.notify('Nie ma nowych aut.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
+        # elif platform == "win32":
+        #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych aut.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+except IOError:
+    print("No previous data - can't diff.")
+
+# else:
+#     print("Keyword was provided; search was successful.") 
+#     # TODO: same as above but with /[x]-search_keyword.txt
 
 # %%
 # === run time ===
