@@ -293,7 +293,7 @@ with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8"
 #             # sys.exit()
 
 # === download images === 
-counter5 = 0 
+counter5 = 1 # images start at list[1] 
 with alive_bar(bar="circles", spinner="dots_waves") as bar:
     for image in imageList:
         try: 
@@ -304,7 +304,8 @@ with alive_bar(bar="circles", spinner="dots_waves") as bar:
                 pass # ignore the error (most likely 404) and move on
             # print(f'Image downloaded: {downloadedImage}')
             try: 
-                os.rename('images/image', 'images/image' + str(counter5) + '.jpg') # rename files to .jph
+                os.rename('images/image', 'images/image' + str(counter5) + '.jpg') # rename files to .jpg
+                # TODO: rename image to image.jpg or remove
             except: # wrong filename 
                 pass # ignore the error (most likely 404) and move on
             bar()
@@ -461,13 +462,13 @@ print(class_names)
 # === visualize the data === 
 import matplotlib.pyplot as plt
 
-plt.figure(figsize=(10, 10))
-for images, labels in train_ds.take(1):
-  for i in range(9):
-    ax = plt.subplot(3, 3, i + 1)
-    plt.imshow(images[i].numpy().astype("uint8"))
-    plt.title(class_names[labels[i]])
-    plt.axis("off")
+# plt.figure(figsize=(10, 10))
+# for images, labels in train_ds.take(1):
+#   for i in range(9):
+#     ax = plt.subplot(3, 3, i + 1)
+#     plt.imshow(images[i].numpy().astype("uint8"))
+#     plt.title(class_names[labels[i]])
+#     plt.axis("off")
 
 
 # %%
@@ -585,13 +586,13 @@ data_augmentation = keras.Sequential(
 
 
 # %%
-plt.figure(figsize=(10, 10))
-for images, _ in train_ds.take(1):
-  for i in range(9):
-    augmented_images = data_augmentation(images)
-    ax = plt.subplot(3, 3, i + 1)
-    plt.imshow(augmented_images[0].numpy().astype("uint8"))
-    plt.axis("off")
+# plt.figure(figsize=(10, 10))
+# for images, _ in train_ds.take(1):
+#   for i in range(9):
+#     augmented_images = data_augmentation(images)
+#     ax = plt.subplot(3, 3, i + 1)
+#     plt.imshow(augmented_images[0].numpy().astype("uint8"))
+#     plt.axis("off")
 
 
 # %%
@@ -649,19 +650,19 @@ val_loss = history.history['val_loss']
 
 epochs_range = range(epochs)
 
-plt.figure(figsize=(8, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
+# plt.figure(figsize=(8, 8))
+# plt.subplot(1, 2, 1)
+# plt.plot(epochs_range, acc, label='Training Accuracy')
+# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+# plt.legend(loc='lower right')
+# plt.title('Training and Validation Accuracy')
 
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
+# plt.subplot(1, 2, 2)
+# plt.plot(epochs_range, loss, label='Training Loss')
+# plt.plot(epochs_range, val_loss, label='Validation Loss')
+# plt.legend(loc='upper right')
+# plt.title('Training and Validation Loss')
+# plt.show()
 
 
 # %%
@@ -669,16 +670,20 @@ plt.show()
 
 # PIL.Image.open(r'#')
 
-counter = 0
-PIL.Image.open('images/image' + str(counter) + '.jpg')
+counter = 1
+# PIL.Image.open('images/image' + str(counter) + '.jpg')
 
 
 # %%
+# try:
 img = keras.preprocessing.image.load_img(
     'images/image' + str(counter) + '.jpg', target_size=(img_height, img_width)
 )
 img_array = keras.preprocessing.image.img_to_array(img)
 img_array = tf.expand_dims(img_array, 0) # Create a batch
+# except # missing numbers in filenames
+
+# PIL.Image.show(img)
 
 predictions = model.predict(img_array)
 score = tf.nn.softmax(predictions[0])
@@ -690,6 +695,9 @@ if class_names[np.argmax(score)] == 'modern':
 else:
     # TODO: exit()
     print('NAY')
+    
+print([imageList[counter]])
+print([imageList[counter-1]])
 
 print(
     "This image most likely belongs to {} with a {:.2f} percent confidence."
@@ -701,4 +709,4 @@ print(
 # run_time = datetime.now()-start
 end_time = time.time() # run time end 
 run_time = round(end_time-start_time,2)
-print("Script run time:", run_time, "seconds.")
+print("Script run time:", run_time, "seconds. That's", round(run_time/60,2), "minutes.")
