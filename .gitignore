@@ -10,6 +10,7 @@ _old
 TODO
 .vscode
 __pycache__
+*.tmp
 
 # files
 output/* 
@@ -20,6 +21,11 @@ fastai
 data
 saved_model
 tensorflow
+
+# images
+images/*.jpg
+images/*.jpeg
+images/image
 
 # model
 run.ipynb

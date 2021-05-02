@@ -1,4 +1,4 @@
-# === libs ===
+# === import libs ===
 
 import pickle # store data
 import os # create new folders
@@ -22,9 +22,18 @@ import requests # for IFTTT integration to send webhook
 import gdshortener # shorten URLs using is.gd 
 import wget # download images
 
+# === import TensorFlow & related libs === 
+import matplotlib.pyplot as plt
+import numpy as np
+import PIL # Pillow, Python Imaging Library
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
+
 # === start + run time ===
 
-start = time.time() # run time start
+start_time = time.time() # run time start
 print("Starting...")
 
 # === have current date & time in exported files' names ===
@@ -373,9 +382,323 @@ else:
     print("Keyword was provided; search was successful.") 
     # TODO: same as above but with /[x]-search_keyword.txt
 
+# === model magic ===
+
+# === download/get images to train the model === 
+import pathlib
+# dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
+print('Downloading or checking the location...')
+# data_dir = tf.keras.utils.get_file('flower_photos', origin=dataset_url, untar=True)
+PATH = './datasets/flats'
+# data_dir = tf.keras.utils.get_file(PATH, origin='')
+data_dir = './datasets/flats'
+data_dir = pathlib.Path(data_dir)
+print('Folder location:', data_dir)
+
+# check number of images 
+count_check = 230+165 # TODO: automate
+image_count = len(list(data_dir.glob('*/*.jpg'))) # !FIX: doesn't work properly
+print(f"Image count: {image_count}/{count_check}")
+
+
+# %%
+# test data
+
+## ancient
+ancient = list(data_dir.glob('ancient/*'))
+PIL.Image.open(str(ancient[0])) # debug
+
+
+# %%
+PIL.Image.open(str(ancient[1])) # debug
+
+
+# %%
+## modern
+modern = list(data_dir.glob('modern/*'))
+PIL.Image.open(str(modern[0])) # debug
+
+
+# %%
+PIL.Image.open(str(modern[1])) # debug
+
+
+# %%
+# === create a dataset from images === 
+batch_size = 32
+img_height = 180
+img_width = 180
+
+
+# %%
+# training dataset
+train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2, # 80% of images for validation
+  subset="training",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+
+
+# %%
+# validation dataset
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2, # 20% of images for validation
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+
+
+# %%
+class_names = train_ds.class_names
+print(class_names)
+
+
+# %%
+# === visualize the data === 
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 10))
+for images, labels in train_ds.take(1):
+  for i in range(9):
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(images[i].numpy().astype("uint8"))
+    plt.title(class_names[labels[i]])
+    plt.axis("off")
+
+
+# %%
+# for image_batch, labels_batch in train_ds:
+#   print(image_batch.shape)
+#   print(labels_batch.shape)
+#   break
+
+
+# %%
+# === configure the dataset for performance ===
+AUTOTUNE = tf.data.AUTOTUNE
+
+train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+# Dataset.cache() keeps the images in memory after they're loaded off disk during the first epoch. This will ensure the dataset does not become a bottleneck while training your model. If your dataset is too large to fit into memory, you can also use this method to create a performant on-disk cache.
+# Dataset.prefetch() overlaps data preprocessing and model execution while training.
+
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+
+
+# %%
+# === standardize the data === 
+# The RGB channel values are in the [0, 255] range. This is not ideal for a neural network; in general you should seek to make your input values small. Here, you will standardize values to be in the [0, 1] range by using a Rescaling layer.
+normalization_layer = layers.experimental.preprocessing.Rescaling(1./255)
+
+
+# %%
+# There are two ways to use this layer. You can apply it to the dataset by calling map:
+normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+image_batch, labels_batch = next(iter(normalized_ds))
+first_image = image_batch[0]
+# Notice the pixels values are now in `[0,1]`.
+print(np.min(first_image), np.max(first_image))
+
+
+# %%
+# # === create a model ===
+num_classes = 5
+
+# model = Sequential([
+#   layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+#   layers.Conv2D(16, 3, padding='same', activation='relu'),
+#   layers.MaxPooling2D(),
+#   layers.Conv2D(32, 3, padding='same', activation='relu'),
+#   layers.MaxPooling2D(),
+#   layers.Conv2D(64, 3, padding='same', activation='relu'),
+#   layers.MaxPooling2D(),
+#   layers.Flatten(),
+#   layers.Dense(128, activation='relu'),
+#   layers.Dense(num_classes)
+# ])
+
+
+# %%
+# === compile the model === 
+# For this tutorial, choose the optimizers.Adam optimizer and losses.SparseCategoricalCrossentropy loss function. To view training and validation accuracy for each training epoch, pass the metrics argument.
+# model.compile(optimizer='adam',
+#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+#               metrics=['accuracy'])
+
+
+# %%
+# View all the layers of the network using the model's summary method:
+# model.summary()
+
+
+# %%
+# === train the model ===
+# epochs=10
+# history = model.fit(
+#   train_ds,
+#   validation_data=val_ds,
+#   epochs=epochs
+# )
+
+# %%
+# === visualize training results ===
+# accuracy is not great because of overfitting - small number of examples to learn from
+# acc = history.history['accuracy']
+# val_acc = history.history['val_accuracy']
+
+# loss = history.history['loss']
+# val_loss = history.history['val_loss']
+
+# epochs_range = range(epochs)
+
+# plt.figure(figsize=(8, 8))
+# plt.subplot(1, 2, 1)
+# plt.plot(epochs_range, acc, label='Training Accuracy')
+# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+# plt.legend(loc='lower right')
+# plt.title('Training and Validation Accuracy')
+
+# plt.subplot(1, 2, 2)
+# plt.plot(epochs_range, loss, label='Training Loss')
+# plt.plot(epochs_range, val_loss, label='Validation Loss')
+# plt.legend(loc='upper right')
+# plt.title('Training and Validation Loss')
+# plt.show()
+
+
+# %%
+# === data augmentation ===
+# generating additional training data from your existing examples by augmenting them using random transformations that yield believable-looking images
+data_augmentation = keras.Sequential(
+  [
+    layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                 input_shape=(img_height, 
+                                                              img_width,
+                                                              3)),
+    layers.experimental.preprocessing.RandomRotation(0.1),
+    layers.experimental.preprocessing.RandomZoom(0.1),
+  ]
+)
+
+
+# %%
+plt.figure(figsize=(10, 10))
+for images, _ in train_ds.take(1):
+  for i in range(9):
+    augmented_images = data_augmentation(images)
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(augmented_images[0].numpy().astype("uint8"))
+    plt.axis("off")
+
+
+# %%
+# === dropout === 
+# When you apply Dropout to a layer it randomly drops out (by setting the activation to zero) a number of output units from the layer during the training process. Dropout takes a fractional number as its input value, in the form such as 0.1, 0.2, 0.4, etc. This means dropping out 10%, 20% or 40% of the output units randomly from the applied layer.
+model = Sequential([
+  data_augmentation,
+  layers.experimental.preprocessing.Rescaling(1./255),
+  layers.Conv2D(16, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(32, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Conv2D(64, 3, padding='same', activation='relu'),
+  layers.MaxPooling2D(),
+  layers.Dropout(0.2),
+  layers.Flatten(),
+  layers.Dense(128, activation='relu'),
+  layers.Dense(num_classes)
+])
+
+
+# %%
+# === compile and train the model ===
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+
+# %%
+model.summary()
+
+
+# %%
+epochs = 15
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
+)
+
+# === save model === 
+# Save the entire model as a SavedModel.
+# model.save('saved_model/my_model')
+
+# === load model ===
+# new_model = tf.keras.models.load_model('saved_model/my_model')
+
+# %%
+# === visualize optimised results === 
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
+
+
+# %%
+# === predicting new images ===
+
+# PIL.Image.open(r'#')
+
+counter = 0
+PIL.Image.open('images/image' + str(counter) + '.jpg')
+
+
+# %%
+img = keras.preprocessing.image.load_img(
+    'images/image' + str(counter) + '.jpg', target_size=(img_height, img_width)
+)
+img_array = keras.preprocessing.image.img_to_array(img)
+img_array = tf.expand_dims(img_array, 0) # Create a batch
+
+predictions = model.predict(img_array)
+score = tf.nn.softmax(predictions[0])
+
+print(class_names[np.argmax(score)]) # debug 
+if class_names[np.argmax(score)] == 'modern':
+    # TODO: magic
+    print('YAY')
+else:
+    # TODO: exit()
+    print('NAY')
+
+print(
+    "This image most likely belongs to {} with a {:.2f} percent confidence."
+    .format(class_names[np.argmax(score)], 100 * np.max(score))
+) 
+
 # === run time ===
 
 # run_time = datetime.now()-start
-end = time.time() # run time end 
-run_time = round(end-start,2)
+end_time = time.time() # run time end 
+run_time = round(end_time-start_time,2)
 print("Script run time:", run_time, "seconds.")
