@@ -28,6 +28,7 @@ Coming soon™.
 
 ## Release History
 
+- 0.11.1: Changed title in notifications.
 - 0.11: Automated runs using Task Scheduler (Windows) & Automator (macOS). Changes to model's dataset. Disabled IFTTT automation for testing.
 - 0.10.2: Cleaned up the code. Added comments.
 - 0.10.1: Cleaned up the code.
