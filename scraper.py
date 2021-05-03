@@ -21,9 +21,9 @@ elif platform == 'darwin':
     import pync # macOS notifications 
 import requests # for IFTTT integration to send webhook
 import gdshortener # shorten URLs using is.gd 
-import wget # download images, Windows
-import shutil # copy files
-from random import randint # randomID
+import wget # download images
+import shutil # copy & move files
+from random import randint # generate random numbers
 
 # %%
 # === import TensorFlow & related libs === 
@@ -64,7 +64,7 @@ except IOError:
     print("File doesn't exist.")
 
 # %%
-# === create new folders ===
+# === create new folders if they don't exist ===
 # output
 if not os.path.isdir("output"):
     os.mkdir("output")
@@ -107,20 +107,19 @@ print("Page URL:", page_url_shortened[0]) # [0] to get the first element from tu
 # %%
 # === IFTTT automation === 
 
-file_saved_imk = './data/imk.pk'
-try: # might crash on first run
-    # load your data back to memory so we can save new value; NOTE: b = binary
+try: 
+    file_saved_imk = './data/imk.pk'
     with open(file_saved_imk, 'rb') as file:
         ifttt_maker_key = pickle.load(file)
-except IOError:
-    print("First run - no file exists.")
+except:
+    print("Add file to the folder, otherwise it will fail.")
 
 event_name = 'new-offer' 
 webhook_url = f'https://maker.ifttt.com/trigger/{event_name}/with/key/{ifttt_maker_key}'
 
 def run_ifttt_automation(url, date):
-    report = {"value1": url, "value2": date}
-    requests.post(webhook_url, data=report)
+    report = {"value1": url, "value2": date} # data passed to IFTTT
+    requests.post(webhook_url, data=report) # send data to IFTTT
 
 # %%
 # === pimp Windows 10 notification === 
@@ -143,7 +142,7 @@ def pullData(page_url):
     print("Waiting for", pause_duration, "seconds before opening URL...")
     with alive_bar(pause_duration, bar="circles", spinner="dots_waves") as bar:
         for _ in range(pause_duration):
-            time.sleep(1)
+            time.sleep(1) 
             bar()
 
     # %%
@@ -187,19 +186,16 @@ try: # if there is only 1 page
     number_of_pages_to_crawl = int(number_of_pages_to_crawl.group(1))
 except AttributeError:
     number_of_pages_to_crawl = 1
-number_of_pages_to_crawl = 0 # *NOTE: force manual
+number_of_pages_to_crawl = 1 # *NOTE: force manual
 print('How many pages are there to crawl?', number_of_pages_to_crawl)
-# !FIX: = 1 is downloading 2 subpages instead of 1
 
 page_prefix = '?&page='
 page_number = 1 # begin at page=1
-# for page in range(page_number, number_of_pages_to_crawl):
 while page_number <= number_of_pages_to_crawl:
     print("Page number:", page_number, "/", number_of_pages_to_crawl) 
     full_page_url = f"{page_url}{page_prefix}{page_number}"
     pullData(full_page_url) # throw URL to function
     page_number += 1 # go to next page
-pullData(page_url) # throw URL to function
 
 # %%
 # === make file more pretty by adding new lines ===
@@ -210,8 +206,8 @@ with open(r"output/" + this_run_datetime + "/1-output.txt", "r", encoding="utf-8
 
 # %%
 urls_line_by_line = re.sub(r"#[a-zA-Z0-9]+(?!https$)://|#[a-zA-Z0-9]+|;promoted", "\n", read_scraping_output_file) # add new lines; remove IDs at the end of URL, eg '#e5c6831089'
-urls_line_by_line = re.sub(r"461", "461\n", urls_line_by_line) # find & replace
-urls_line_by_line = re.sub(r"html\?", "html\n", urls_line_by_line) # find & replace
+urls_line_by_line = re.sub(r"461", "461\n", urls_line_by_line) # find & replace to add new lines
+urls_line_by_line = re.sub(r"html\?", "html\n", urls_line_by_line) # find & replace to add new lines
 
 # %%
 urls_line_by_line = urls_line_by_line.replace("ireland.", "https://ireland.") # make text clickable again
@@ -222,7 +218,7 @@ urls_line_by_line = urls_line_by_line.replace("https://https://", "https://") # 
 print("Cleaning the file...")
 
 # %%
-# === remove duplicates & sort === 
+# === add URLs to list; add new lines so 1 URL = 1 line === 
 
 # %%
 imageList = urls_line_by_line.split() # remove "\n"; add to list
@@ -230,17 +226,17 @@ imageList = urls_line_by_line.split() # remove "\n"; add to list
 print("File cleaned up. New lines added.")
 
 with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8") as clean_file:
-    for element in imageList: 
+    for element in imageList: # go through the list
         clean_file.write("%s\n" % element) # write to file
 
 # %%
 # === download images === 
 if platform == 'win32': # Windows
-    counter5 = 1 # images start at list[1] 
+    counter5 = 1 # images (should) start at list[1] 
     with alive_bar(bar="circles", spinner="dots_waves") as bar:
-        for image in imageList:
+        for image in imageList: # go through the list
             try: 
-                imageURL = imageList[counter5]
+                imageURL = imageList[counter5] # images (should) start at list[1] 
                 try:
                     downloadedImage = wget.download(imageURL, out='images/' + this_run_datetime) # download image
                     counter7 = imageList.index(imageURL) # get item's list index 
@@ -250,10 +246,9 @@ if platform == 'win32': # Windows
                 # print(f'Image downloaded: {downloadedImage}')
                 try: 
                     os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image' + str(counter7) + '.jpg') # rename files to .jpg
-                    # TODO: rename image to image.jpg or remove
                 except: # wrong filename 
                     pass # ignore the error (most likely 404) and move on
-                bar()
+                bar() # progress bar
                 counter5 += 1 
             except IndexError: # if counter > len(imageList)
                 continue
@@ -587,15 +582,12 @@ epochs_range = range(epochs)
 
 # %%
 path_folderWithImages = 'images/' + this_run_datetime + '/' # TODO: date-specific folders for images
-# counter6 = 1
-# counter2 = 20
-# randomID = randint(1,1000)
 try:
     with os.scandir(path_folderWithImages) as folderWithImages: # 2-20x faster than listdir()
     # for image in os.listdir(path_folderWithImages): # *NOTE: listdir() fragment
         # TODO: progress bar?
-        for image in folderWithImages:
-            randomID = randint(1,1000)
+        for image in folderWithImages: # go through list
+            randomID = randint(1,1000) # generate random number
         # if image.endswith(".jpg"): # *NOTE: listdir() fragment
             if image.name.endswith(".jpg"):
                 # print(os.path.join(path_folderWithImages, image)) # *NOTE: listdir() fragment
@@ -651,10 +643,9 @@ for line in open(r"output/" + this_run_datetime + "/4-modern-offers_temp2.txt", 
         lines_seen.add(line)
 outfile.close()
 
-# TODO: compare this file with previous_date 
-
 # %%
 # === compare files === 
+# TODO: compare this file with previous_date 
 
 try:
     file_previous_run = open('output/' + previous_run_datetime + '/5-modern-offers.txt', 'r') # 1st file 
@@ -673,7 +664,6 @@ try:
             with alive_bar(bar="circles", spinner="dots_waves") as bar:
                 for url in diff1: # go piece by piece through the differences 
                     w.write(url) # write to file
-                    # run_ifttt_automation(url, this_run_datetime, location) # run IFTTT automation with URL
                     run_ifttt_automation(url, this_run_datetime) # run IFTTT automation with URL
                     # print('Running IFTTT automation...')
                     bar()

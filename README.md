@@ -16,6 +16,7 @@
 
 ## Release History
 
+- 0.10.2: Cleaned up the code. Added comments.
 - 0.10.1: Cleaned up the code.
 - 0.10: Added macOS compatibility. Enabled IFTTT automation. Improved model accuracy - newly downloaded images are used to feed the model so it can improve itself over time.
 - 0.9: Pagination support.
