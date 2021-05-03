@@ -4,10 +4,10 @@
 
 >Looking for a modern, nicely looking apartment but tired with all these old flats from the '90s? Let's automate that :) <br><br> Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model to get only good looking flats and (optionally) run IFTTT automation (eg. send email; add a to-do task) when new offers matching search criteria (eg. ≥ 2 rooms, ≤ 2k PLN, ≥ 30m²) are found. <br><br> With support for native macOS & Windows 10 notifications. 
 
-<!-- ## Screenshots -->
+## Screenshots
 
 ![macOS](https://user-images.githubusercontent.com/6877391/116890697-2e49e580-ac2e-11eb-968d-7146fd10e871.png)
-![Windows](https://user-images.githubusercontent.com/6877391/116941794-b05afe00-ac70-11eb-9c2a-42d782fd9b21.png)
+![Windows](https://user-images.githubusercontent.com/6877391/116942708-65da8100-ac72-11eb-8023-6e4ae0161cc2.png)
 
 ## Features
 
@@ -18,7 +18,9 @@
 - Cross platform (macOS & Windows)
 - Native notifications (maCOS & Windows)
 
-<!-- ## How to use -->
+## How to use
+
+Coming soon™.
 
 <!-- ## Roadmap -->
 
