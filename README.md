@@ -85,4 +85,4 @@ Using [SemVer](http://semver.org/).
 
 ![](https://img.shields.io/github/issues/vardecab/flat-finder)
 
-If you found a bug or want to propose a feature, feel free to visit [the Issues page](https://github.com/vardecab/flat-scraper/issues).
+If you found a bug or want to propose a feature, feel free to visit [the Issues page](https://github.com/vardecab/flat-finder/issues).
