@@ -1,12 +1,15 @@
 # flat-scraper
 
->Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model and run IFTTT automation (eg. send email; add a to-do task) when new offer(s) matching search criteria is found. 
-<!-- With support for native macOS & Windows 10 notifications.  -->
+>Looking for a modern, nicely looking apartment? Let's automate that :) 
+
+>Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model (assess which offer shows new ("modern") and which old ("ancient") apartments) and (optionally) run IFTTT automation (eg. send email; add a to-do task) when new offer(s) matching search criteria (eg. modern, < 2k PLN, > 30m²) is found.
+
+>With support for native macOS & Windows 10 notifications. 
 
 <!-- ## Screenshots -->
 
 <!-- ![Windows](#) -->
-<!-- ![macOS](#) -->
+![macOS](https://user-images.githubusercontent.com/6877391/116890697-2e49e580-ac2e-11eb-968d-7146fd10e871.png)
 
 <!-- ## How to use
 
