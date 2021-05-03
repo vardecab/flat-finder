@@ -1,4 +1,4 @@
-# flat-scraper
+# flat-finder
 
 ![](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
 
@@ -47,7 +47,7 @@ Coming soon™.
 Using [SemVer](http://semver.org/).
 
 ## License
-![](https://img.shields.io/github/license/vardecab/flat-scraper)
+![](https://img.shields.io/github/license/vardecab/flat-finder)
 
 <!-- GNU General Public License v3.0 -->
 <!-- GNU General Public License v3.0, see [LICENSE.md](https://github.com/vardecab/PROJECT/blob/master/LICENSE). -->
@@ -83,6 +83,6 @@ Using [SemVer](http://semver.org/).
 
 ## Contributing
 
-![](https://img.shields.io/github/issues/vardecab/flat-scraper)
+![](https://img.shields.io/github/issues/vardecab/flat-finder)
 
 If you found a bug or want to propose a feature, feel free to visit [the Issues page](https://github.com/vardecab/flat-scraper/issues).
