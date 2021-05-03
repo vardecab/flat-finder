@@ -16,6 +16,7 @@
 
 ## Release History
 
+- 0.10.1: Cleaned up the code.
 - 0.10: Added macOS compatibility. Enabled IFTTT automation. Improved model accuracy - newly downloaded images are used to feed the model so it can improve itself over time.
 - 0.9: Pagination support.
 - 0.8: Enabled Windows 10 & macOS notifications when new offers are found.

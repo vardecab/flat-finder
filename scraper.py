@@ -95,7 +95,6 @@ if not os.path.isdir("images/feeding/ancient"):
 # %%
 # === URL to scrape ===
 
-# page_url = "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/"
 page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/?search%5Bfilter_float_price%3Ato%5D=2000"
 
 # %%
@@ -119,9 +118,7 @@ except IOError:
 event_name = 'new-offer' 
 webhook_url = f'https://maker.ifttt.com/trigger/{event_name}/with/key/{ifttt_maker_key}'
 
-# def run_ifttt_automation(url, date, location): # TODO: remove location - not needed
 def run_ifttt_automation(url, date):
-    # report = {"value1": url, "value2": date, "value3": location}
     report = {"value1": url, "value2": date}
     requests.post(webhook_url, data=report)
 
@@ -142,8 +139,7 @@ def open_url():
 def pullData(page_url):
 
     # %%
-    # ? can't crawl too often? works better with OTOMOTO limits perhaps
-    pause_duration = 2 # seconds to wait
+    pause_duration = 1 # seconds to wait
     print("Waiting for", pause_duration, "seconds before opening URL...")
     with alive_bar(pause_duration, bar="circles", spinner="dots_waves") as bar:
         for _ in range(pause_duration):
@@ -179,28 +175,7 @@ def pullData(page_url):
                 counter += 1 # counter ++
         print("Successfully added", counter, "offers to the file.")
         print("Successfully added", counter1, "images to the file.")
-
-        # counter = 0 # counter to get # of URLs/images
-        # with alive_bar(bar="classic2", spinner="classic") as bar: # progress bar
-        #     for link in soup.find_all("img", class_="fleft"):
-        #         bs_output.write(link.get('src'))
-        #         counter += 1 # counter ++
-        #         bar() # progress bar ++
-        #         # print ("Adding", counter, "URL to file...")
-        # print("Successfully added", counter, "images to file.")
-
         
-# %%
-# === get the number# of search results pages & run URLs in function ^ ===
-
-# # *NOTE 1/2: perhaps no longer needed as of 0.10? 
-# try:
-#     open(r"output/" + this_run_datetime + "/1-output.txt",
-#          "w").close() # clean main file at start
-# except: # crashes on 1st run when file is not yet created
-#     print("Nothing to clean, moving on...")
-# # *NOTE 2/2: ^
-
 # %%
 # === pagination support ===
 # OLX
@@ -227,9 +202,6 @@ while page_number <= number_of_pages_to_crawl:
 pullData(page_url) # throw URL to function
 
 # %%
-# pullData(page_url) # throw URL to function
-
-# %%
 # === make file more pretty by adding new lines ===
 
 with open(r"output/" + this_run_datetime + "/1-output.txt", "r", encoding="utf-8") as scraping_output_file: # open file...
@@ -254,28 +226,10 @@ print("Cleaning the file...")
 
 # %%
 imageList = urls_line_by_line.split() # remove "\n"; add to list
-# uniqueimageList = list(set(imageList)) # remove duplicates 
-# print(f'There are {len(imageList)/2} images in total.') # *NOTE: offers/images
-
-# print(imageList) # debug
-# print(f'Before removing duplicates: {len(imageList)}')  
-# print(imageList[0]) # debug 
-# print(imageList[1]) # debug 
-
-# %%
-sortedImageList = list(dict.fromkeys(imageList)) # sort without changing the order
-# TODO: use this somewhere? 
-# print(sortedImageList) # debug 
-# print(f'After removing duplicates: {len(sortedImageList)}') 
-# print(sortedImageList[0]) # debug 
-# print(sortedImageList[1]) # debug 
-
 # %%
 print("File cleaned up. New lines added.")
 
 with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8") as clean_file:
-    # for element in sorted(uniqueimageList): # sort URLs
-    # for element in uniqueimageList: # sort URLs
     for element in imageList: 
         clean_file.write("%s\n" % element) # write to file
 
@@ -306,8 +260,7 @@ if platform == 'win32': # Windows
 
 elif platform == 'darwin': # macOS
     ssl._create_default_https_context = ssl._create_unverified_context # disable SSL validation
-    # counter5 = 1 # images start at list[1] 
-    # with alive_bar(bar="circles", spinner="dots_waves") as bar:
+    # with alive_bar(bar="circles", spinner="dots_waves") as bar: # TODO
     for image in imageList:
         # try: 
         # imageURL = imageList[counter5]
@@ -324,7 +277,6 @@ elif platform == 'darwin': # macOS
         except: # wrong filename 
             pass # ignore the error (most likely 404) and move on
             # bar()
-            # counter5 += 1 
             # except IndexError: # if counter > len(imageList)
             #     continue
 
@@ -334,18 +286,12 @@ try:
     os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image.html') # rename 'image' file so it can be deleted
 except FileNotFoundError:
     print("Can't find 'image' file.")
+
 # remove .html files so we only have .jpg
-# folderImages = "images/"
 folderImages = os.listdir('images/' + this_run_datetime)
 for website in folderImages:
     if website.endswith(".html"):
         os.remove(os.path.join('images/' + this_run_datetime, website))
-
-# remove 'image' file in images/
-# folderImages = os.listdir("images/")
-# for imageFile in folderImages:
-#     if imageFile.endswith(""):
-#         os.remove(os.path.join("images/", imageFile))
 
 # %%
 # remove .tmp files from main folder
@@ -368,12 +314,6 @@ PATH = './datasets/flats'
 data_dir = './datasets/flats'
 data_dir = pathlib.Path(data_dir)
 print('Folder location:', data_dir)
-
-# check number of images 
-# count_check = 230+165 # TODO: automate
-# image_count = len(list(data_dir.glob('*/*.jpg'))) # !FIX: doesn't work properly
-# print(f"Image count: {image_count}/{count_check}")
-
 
 # %%
 # test data
@@ -716,11 +656,6 @@ outfile.close()
 # %%
 # === compare files === 
 
-# try:
-#     counter2
-# except NameError:
-#     print("Variable not defined. Keyword wasn't provided.") 
-
 try:
     file_previous_run = open('output/' + previous_run_datetime + '/5-modern-offers.txt', 'r') # 1st file 
     file_current_run = open('output/' + this_run_datetime + '/5-modern-offers.txt', 'r') # 2nd file 
@@ -745,31 +680,17 @@ try:
                     counter4 += 1 # counter++
         if counter4 <= 0: # should not fire 
             print ('No new apartments since last run.') 
-            # if platform == "darwin":
-            #     pync.notify('Nie ma nowych mieszkań.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
-            # elif platform == "win32":
-            #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych mieszkań.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
         else:
             print (counter4, "new apartments found since last run! Go check them now!") 
             if platform == "darwin":
                 pync.notify(f'Nowe mieszkania: {counter4}', title='OLX', open=page_url, contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
             elif platform == "win32":
                 toaster.show_toast(title="OLX", msg=f'Nowe mieszkania: {counter4}', icon_path="./icons/apartment.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-                # time.sleep(5)
-                # webbrowser.open(page_url)
 
     else: # check if set is empty - if it is then there are no differences between files 
         print('Files are the same.')
-        # if platform == "darwin":
-        #         pync.notify('Nie ma nowych mieszkań.', title='OTOMOTO', open=page_url, contentImage="https://i.postimg.cc/t4qh2n6V/car.png") # appIcon="" doesn't work, using contentImage instead
-        # elif platform == "win32":
-        #     toaster.show_toast(title="OTOMOTO", msg='Nie ma nowych mieszkań.', icon_path="icons/car.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
 except IOError:
     print("No previous data - can't diff.")
-
-# else:
-#     print("Keyword was provided; search was successful.") 
-#     # TODO: same as above but with /[x]-search_keyword.txt
 
 # %%
 # === run time ===
