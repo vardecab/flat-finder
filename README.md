@@ -1,8 +1,10 @@
 # flat-scraper
 
->Looking for a modern, nicely looking apartment? Let's automate that :) 
+![](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
 
->Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model (assess which offer shows new ("modern") and which old ("ancient") apartments) and (optionally) run IFTTT automation (eg. send email; add a to-do task) when new offer(s) matching search criteria (eg. modern, < 2k PLN, > 30m²) is found.
+>Looking for a modern, nicely looking apartment but tired with all these old flats from the '90s? Let's automate that :) 
+
+>Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model to get only good looking flats and (optionally) run IFTTT automation (eg. send email; add a to-do task) when new offers matching search criteria (eg. ≥ 2 rooms, ≤ 2k PLN, ≥ 30m²) are found.
 
 >With support for native macOS & Windows 10 notifications. 
 
@@ -11,14 +13,24 @@
 <!-- ![Windows](#) -->
 ![macOS](https://user-images.githubusercontent.com/6877391/116890697-2e49e580-ac2e-11eb-968d-7146fd10e871.png)
 
-<!-- ## How to use
+## Features
 
-<!-- ## Roadmap
+- Get offers from OLX․pl
+- Pagination support
+- Artificial intelligence (AI) model to assess if an aparment is modern or not
+- IFTTT (eg. send an email or add a to-do task if new offer is found)
+- Cross platform (macOS & Windows)
+- Native notifications (maCOS & Windows)
 
-- lorem ipsum --> 
+<!-- ## How to use -->
+
+<!-- ## Roadmap -->
+
+<!-- - lorem ipsum  -->
 
 ## Release History
 
+- 0.11: Automated runs using Task Scheduler (Windows) & Automator (macOS). Changes to model's dataset. Disabled IFTTT automation for testing.
 - 0.10.2: Cleaned up the code. Added comments.
 - 0.10.1: Cleaned up the code.
 - 0.10: Added macOS compatibility. Enabled IFTTT automation. Improved model accuracy - newly downloaded images are used to feed the model so it can improve itself over time.

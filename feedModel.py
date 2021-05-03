@@ -3,6 +3,8 @@
 import os 
 import shutil 
 
+print('Starting...')
+
 folderAncient = os.listdir("./images/feeding/ancient")
 for image in folderAncient:
     if image.endswith(".jpg"):
@@ -12,3 +14,5 @@ folderModern = os.listdir("./images/feeding/modern")
 for image in folderModern:
     if image.endswith(".jpg"):
         shutil.move("./images/feeding/modern/" + image, './datasets/flats/modern/')
+
+print('Done, model fed :)')

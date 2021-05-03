@@ -15,19 +15,25 @@ __pycache__
 # files
 output/* 
 !output/.gitkeep
-images/* 
-!images/.gitkeep
-fastai
 data
-saved_model
-tensorflow
 scraper.ipynb
 
 # images
 images/*.jpg
 images/*.jpeg
 images/image
+images/* 
+!images/.gitkeep
 
 # model
 run.ipynb
 run.py
+fastai
+saved_model
+tensorflow
+
+# automate
+automate/windows/*
+!automate/windows/.gitkeep
+automate/macos/*
+!automate/macos/.gitkeep

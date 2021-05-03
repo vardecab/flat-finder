@@ -664,7 +664,7 @@ try:
             with alive_bar(bar="circles", spinner="dots_waves") as bar:
                 for url in diff1: # go piece by piece through the differences 
                     w.write(url) # write to file
-                    run_ifttt_automation(url, this_run_datetime) # run IFTTT automation with URL
+                    # run_ifttt_automation(url, this_run_datetime) # run IFTTT automation with URL
                     # print('Running IFTTT automation...')
                     bar()
                     counter4 += 1 # counter++
