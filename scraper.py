@@ -21,7 +21,9 @@ elif platform == 'darwin':
     import pync # macOS notifications 
 import requests # for IFTTT integration to send webhook
 import gdshortener # shorten URLs using is.gd 
-import wget # download images
+import wget # download images, Windows
+import shutil # copy files
+from random import randint # randomID
 
 # %%
 # === import TensorFlow & related libs === 
@@ -80,14 +82,21 @@ if not os.path.isdir("images"):
 if not os.path.isdir("images/" + this_run_datetime):
     os.mkdir("images/" + this_run_datetime) # eg 210120-173112
     print(f"Folder created: images/{this_run_datetime}")
+if not os.path.isdir("images/feeding"):
+    os.mkdir("images/feeding") 
+    print(f"Folder created: images/feeding")
+if not os.path.isdir("images/feeding/modern"):
+    os.mkdir("images/feeding/modern") 
+    print(f"Folder created: images/feeding/modern")
+if not os.path.isdir("images/feeding/ancient"):
+    os.mkdir("images/feeding/ancient") 
+    print(f"Folder created: images/feeding/ancient")
 
 # %%
 # === URL to scrape ===
 
 # page_url = "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/"
-page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/"
-# TODO: location is used for IFTTT function - can remove
-# location = "" 
+page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/?search%5Bfilter_float_price%3Ato%5D=2000"
 
 # %%
 # === shorten the URL === 
@@ -99,20 +108,22 @@ print("Page URL:", page_url_shortened[0]) # [0] to get the first element from tu
 # %%
 # === IFTTT automation === 
 
-# file_saved_imk = '/data/imk.pk'
-# try: # might crash on first run
-#     # load your data back to memory so we can save new value; NOTE: b = binary
-#     with open(file_saved_imk, 'rb') as file:
-#         ifttt_maker_key = pickle.load(file)
-# except IOError:
-#     print("First run - no file exists.")
+file_saved_imk = './data/imk.pk'
+try: # might crash on first run
+    # load your data back to memory so we can save new value; NOTE: b = binary
+    with open(file_saved_imk, 'rb') as file:
+        ifttt_maker_key = pickle.load(file)
+except IOError:
+    print("First run - no file exists.")
 
-# event_name = 'new-car' # TODO: change to new-offer
-# webhook_url = f'https://maker.ifttt.com/trigger/{event_name}/with/key/{ifttt_maker_key}'
+event_name = 'new-offer' 
+webhook_url = f'https://maker.ifttt.com/trigger/{event_name}/with/key/{ifttt_maker_key}'
 
 # def run_ifttt_automation(url, date, location): # TODO: remove location - not needed
-#     report = {"value1": url, "value2": date, "value3": location}
-#     requests.post(webhook_url, data=report)
+def run_ifttt_automation(url, date):
+    # report = {"value1": url, "value2": date, "value3": location}
+    report = {"value1": url, "value2": date}
+    requests.post(webhook_url, data=report)
 
 # %%
 # === pimp Windows 10 notification === 
@@ -201,8 +212,9 @@ try: # if there is only 1 page
     number_of_pages_to_crawl = int(number_of_pages_to_crawl.group(1))
 except AttributeError:
     number_of_pages_to_crawl = 1
-number_of_pages_to_crawl = 3 # *NOTE: force manual
+number_of_pages_to_crawl = 0 # *NOTE: force manual
 print('How many pages are there to crawl?', number_of_pages_to_crawl)
+# !FIX: = 1 is downloading 2 subpages instead of 1
 
 page_prefix = '?&page='
 page_number = 1 # begin at page=1
@@ -269,30 +281,55 @@ with open(r"output/" + this_run_datetime + "/2-clean.txt", "w", encoding="utf-8"
 
 # %%
 # === download images === 
-counter5 = 1 # images start at list[1] 
-with alive_bar(bar="circles", spinner="dots_waves") as bar:
-    for image in imageList:
-        try: 
-            imageURL = imageList[counter5]
-            try:
-                downloadedImage = wget.download(imageURL, out='images/' + this_run_datetime) # download image
-                counter7 = imageList.index(imageURL) # get item's list index 
-                print(f'Index ID: {counter7}')
-            except: # 404
-                pass # ignore the error (most likely 404) and move on
-            # print(f'Image downloaded: {downloadedImage}')
+if platform == 'win32': # Windows
+    counter5 = 1 # images start at list[1] 
+    with alive_bar(bar="circles", spinner="dots_waves") as bar:
+        for image in imageList:
             try: 
-                os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image' + str(counter7) + '.jpg') # rename files to .jpg
-                # TODO: rename image to image.jpg or remove
-            except: # wrong filename 
-                pass # ignore the error (most likely 404) and move on
-            bar()
-            counter5 += 1 
-        except IndexError: # if counter > len(imageList)
-            continue
+                imageURL = imageList[counter5]
+                try:
+                    downloadedImage = wget.download(imageURL, out='images/' + this_run_datetime) # download image
+                    counter7 = imageList.index(imageURL) # get item's list index 
+                    print(f'Index ID: {counter7}')
+                except: # 404
+                    pass # ignore the error (most likely 404) and move on
+                # print(f'Image downloaded: {downloadedImage}')
+                try: 
+                    os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image' + str(counter7) + '.jpg') # rename files to .jpg
+                    # TODO: rename image to image.jpg or remove
+                except: # wrong filename 
+                    pass # ignore the error (most likely 404) and move on
+                bar()
+                counter5 += 1 
+            except IndexError: # if counter > len(imageList)
+                continue
+
+elif platform == 'darwin': # macOS
+    ssl._create_default_https_context = ssl._create_unverified_context # disable SSL validation
+    # counter5 = 1 # images start at list[1] 
+    # with alive_bar(bar="circles", spinner="dots_waves") as bar:
+    for image in imageList:
+        # try: 
+        # imageURL = imageList[counter5]
+        try:
+            downloadedImage = wget.download(image, out='images/' + this_run_datetime) # download image
+            counter7 = imageList.index(image) # get item's list index 
+            print(f'Index ID: {counter7}')
+        except: # 404
+            pass # ignore the error (most likely 404) and move on
+        # print(f'Image downloaded: {downloadedImage}')
+        try: 
+            os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image' + str(counter7) + '.jpg') # rename files to .jpg
+            # TODO: rename image to image.jpg or remove
+        except: # wrong filename 
+            pass # ignore the error (most likely 404) and move on
+            # bar()
+            # counter5 += 1 
+            # except IndexError: # if counter > len(imageList)
+            #     continue
 
 # %%
-# remove files 
+# === remove files === 
 try: 
     os.rename('images/' + this_run_datetime + '/image', 'images/' + this_run_datetime + '/image.html') # rename 'image' file so it can be deleted
 except FileNotFoundError:
@@ -317,7 +354,6 @@ folderMain = os.listdir("./")
 for temps in folderMain:
     if temps.endswith(".tmp"):
         os.remove(os.path.join("./", temps))
-
 # %%
 # === model magic ===
 
@@ -395,8 +431,7 @@ print(class_names)
 
 
 # %%
-# === visualize the data === 
-import matplotlib.pyplot as plt
+# === visualize the data using Matplotlib === 
 
 # plt.figure(figsize=(10, 10))
 # for images, labels in train_ds.take(1):
@@ -613,11 +648,14 @@ epochs_range = range(epochs)
 # %%
 path_folderWithImages = 'images/' + this_run_datetime + '/' # TODO: date-specific folders for images
 # counter6 = 1
+# counter2 = 20
+# randomID = randint(1,1000)
 try:
     with os.scandir(path_folderWithImages) as folderWithImages: # 2-20x faster than listdir()
     # for image in os.listdir(path_folderWithImages): # *NOTE: listdir() fragment
         # TODO: progress bar?
         for image in folderWithImages:
+            randomID = randint(1,1000)
         # if image.endswith(".jpg"): # *NOTE: listdir() fragment
             if image.name.endswith(".jpg"):
                 # print(os.path.join(path_folderWithImages, image)) # *NOTE: listdir() fragment
@@ -642,9 +680,15 @@ try:
                     with open(r"output/" + this_run_datetime + "/3-modern-offers_temp.txt", "a", encoding="utf-8") as modernOffers:
                         modernOffers.write(imageList[imageNumber-1] + "\n")
                         modernOffers.write(imageList[imageNumber] + "\n")
+
+                    # copy images so they can be manually reviewed and used to feed the model
+                    shutil.copy2("images/" + this_run_datetime + "/" + image.name, 'images/feeding/modern/' + str(randomID) + "-" + image.name)
                 else:
                     print("Ancient. Accuracy: {:.2f}%.".format(100 * np.max(score)))
                     print("Let's move on.")
+
+                    # copy images so they can be manually reviewed and used to feed the model
+                    shutil.copy2("images/" + this_run_datetime + "/" + image.name, 'images/feeding/ancient/' + str(randomID) + "-" + image.name)
                 print("=== === ===")
                 # counter6 += 1
 
@@ -695,6 +739,7 @@ try:
                 for url in diff1: # go piece by piece through the differences 
                     w.write(url) # write to file
                     # run_ifttt_automation(url, this_run_datetime, location) # run IFTTT automation with URL
+                    run_ifttt_automation(url, this_run_datetime) # run IFTTT automation with URL
                     # print('Running IFTTT automation...')
                     bar()
                     counter4 += 1 # counter++
