@@ -6,8 +6,8 @@
 
 <!-- ## Screenshots -->
 
-<!-- ![Windows](#) -->
 ![macOS](https://user-images.githubusercontent.com/6877391/116890697-2e49e580-ac2e-11eb-968d-7146fd10e871.png)
+![Windows](https://user-images.githubusercontent.com/6877391/116941794-b05afe00-ac70-11eb-9c2a-42d782fd9b21.png)
 
 ## Features
 
