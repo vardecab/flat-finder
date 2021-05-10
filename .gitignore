@@ -31,6 +31,8 @@ run.py
 fastai
 saved_model
 tensorflow
+accuracy/*
+correct.py
 
 # automate
 automate/windows/*

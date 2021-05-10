@@ -28,6 +28,7 @@ Coming soon™.
 
 ## Release History
 
+- 0.11.2: Increase # of epochs to improve model's accuracy; added more images to model's dataset.
 - 0.11.1: Changed title in notifications.
 - 0.11: Automated runs using Task Scheduler (Windows) & Automator (macOS). Added more images to model's dataset. Disabled IFTTT automation for testing.
 - 0.10.2: Cleaned up the code. Added comments.
