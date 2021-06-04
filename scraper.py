@@ -24,12 +24,15 @@ import gdshortener # shorten URLs using is.gd
 import wget # download images
 import shutil # copy & move files
 from random import randint # generate random numbers
+import colorama # colored input/output in terminal
+from colorama import Fore, Style # colored input/output in terminal
+colorama.init(autoreset=True) # if you find yourself repeatedly sending reset sequences to turn off color changes at the end of every print, then init(autoreset=True) will automate that
 
 # %%
 # === import TensorFlow & related libs === 
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL # Pillow, Python Imaging Library
+import PIL # Pillow, Python Imaging Library; show images
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -95,7 +98,8 @@ if not os.path.isdir("images/feeding/ancient"):
 # %%
 # === URL to scrape ===
 
-page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/?search%5Bfilter_float_price%3Ato%5D=2000"
+# page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/?search%5Bfilter_float_price%3Ato%5D=2000" # Wrocław; 2k PLN
+page_url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/wroclaw/?search%5Bfilter_float_price%3Ato%5D=1600&search%5Bphotos%5D=1" # Wrocław; with photos; 1.6k PLN
 
 # %%
 # === shorten the URL === 
@@ -587,6 +591,7 @@ try:
     with os.scandir(path_folderWithImages) as folderWithImages: # 2-20x faster than listdir()
     # for image in os.listdir(path_folderWithImages): # *NOTE: listdir() fragment
         # TODO: progress bar?
+        counterModern = 0 # count modern offers
         for image in folderWithImages: # go through list
             randomID = randint(1,1000) # generate random number
         # if image.endswith(".jpg"): # *NOTE: listdir() fragment
@@ -607,7 +612,8 @@ try:
                 score = tf.nn.softmax(predictions[0])
 
                 if class_names[np.argmax(score)] == 'modern':
-                    print("Modern. Accuracy: {:.2f}%.".format(100 * np.max(score)))
+                    print("Modern")
+                    print("Accuracy: {:.2f}%".format(100 * np.max(score)))
                     print(f'Offer ID: {imageNumber-1} // Offer URL: {imageList[imageNumber-1]}')
                     print(f'Image ID: {imageNumber} // Image URL: {imageList[imageNumber]}')
                     with open(r"output/" + this_run_datetime + "/3-modern-offers_temp.txt", "a", encoding="utf-8") as modernOffers:
@@ -617,7 +623,8 @@ try:
                     # copy images so they can be manually reviewed and used to feed the model
                     shutil.copy2("images/" + this_run_datetime + "/" + image.name, 'images/feeding/modern/' + str(randomID) + "-" + image.name)
                 else:
-                    print("Ancient. Accuracy: {:.2f}%.".format(100 * np.max(score)))
+                    print("Ancient")
+                    print("Accuracy: {:.2f}%".format(100 * np.max(score)))
                     print("Let's move on.")
 
                     # copy images so they can be manually reviewed and used to feed the model
@@ -661,27 +668,38 @@ try:
 
     if diff1:
         with open('output/diff/diff-' + this_run_datetime + '.txt', 'w') as w:
-            counter4 = 0 # counter 
+            counterNewOffers = 0 # counter 
             with alive_bar(bar="circles", spinner="dots_waves") as bar:
-                for url in diff1: # go piece by piece through the differences 
-                    w.write(url) # write to file
-                    # run_ifttt_automation(url, this_run_datetime) # run IFTTT automation with URL
+                for newOffer in diff1: # go piece by piece through the differences 
+                    w.write(newOffer) # write to file
+                    # TODO: enable IFTTT
+                    # run_ifttt_automation(newOffer, this_run_datetime) # run IFTTT automation with URL
                     # print('Running IFTTT automation...')
+                    # TODO: ^
                     bar()
-                    counter4 += 1 # counter++
-        if counter4 <= 0: # should not fire 
-            print ('No new apartments since last run.') 
+                    counterNewOffers += 1 # counter++
+        if counterNewOffers <= 0: # should not fire 
+            print(f"{Fore.YELLOW}No new apartments since last run.") # colorama - yellow output
         else:
-            print (counter4, "new apartments found since last run! Go check them now!") 
+            print(f"{Fore.YELLOW}{counterNewOffers} new apartments found since last run! Go check them now!") # colorama - yellow output
             if platform == "darwin":
-                pync.notify(f'Nowe mieszkania: {counter4}', title='flat-finder', open=page_url, contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
+                pync.notify(f'Nowe mieszkania: {counterNewOffers}', title='flat-finder', open=page_url, contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
             elif platform == "win32":
-                toaster.show_toast(title="flat-finder", msg=f'Nowe mieszkania: {counter4}', icon_path="./icons/apartment.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+                toaster.show_toast(title="flat-finder", msg=f'Nowe mieszkania: {counterNewOffers}', icon_path="./icons/apartment.ico", duration=None, threaded=True, callback_on_click=open_url) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
 
     else: # check if set is empty - if it is then there are no differences between files 
-        print('Files are the same.')
+        print(f"{Fore.GREEN}Files are the same.") # colorama - green output
 except IOError:
-    print("No previous data - can't diff.")
+    print(f"{Fore.RED}No previous data - can't diff. Either it's a first run or previous run crashed.") # colorama - red output
+
+# %% 
+# ---- output all relevant offers ---- #
+with open(r"output/diff/diff-" + this_run_datetime + ".txt", "r", encoding="utf-8") as allRelevantOffers:
+    offers = allRelevantOffers.read().splitlines() # read & remove new line character
+    for counter9, offer in enumerate(offers):
+        print(f"{Fore.GREEN}{offer}") # colorama - green output
+
+print(Style.RESET_ALL) # colorama - reset output color 
 
 # %%
 # === run time ===
@@ -689,4 +707,4 @@ except IOError:
 # run_time = datetime.now()-start
 end_time = time.time() # run time end 
 run_time = round(end_time-start_time,2)
-print("Script run time:", run_time, "seconds. That's", round(run_time/60,2), "minutes.")
+print(f"Script run time: {run_time} seconds. That's {round(run_time/60,2)} minutes.")

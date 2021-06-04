@@ -28,8 +28,9 @@ Coming soon™.
 
 ## Release History
 
+- 0.12: Added `colorama` to have colored output; changed URL; added more images to model's dataset; added fix for `feedModel.py` crashing due to duplicates found in target location.
 - 0.11.3: Forced to look only on 3 subpages.
-- 0.11.2: Increase # of epochs to improve model's accuracy; added more images to model's dataset.
+- 0.11.2: Increased # of epochs to improve model's accuracy; added more images to model's dataset.
 - 0.11.1: Changed title in notifications.
 - 0.11: Automated runs using Task Scheduler (Windows) & Automator (macOS). Added more images to model's dataset. Disabled IFTTT automation for testing.
 - 0.10.2: Cleaned up the code. Added comments.
@@ -70,7 +71,7 @@ Using [SemVer](http://semver.org/).
 - [Pillow](https://python-pillow.org/)
 - [NumPy](https://numpy.org/)
 - [Matplotlib](https://matplotlib.org/)
-<!-- - [termcolor](https://pypi.org/project/termcolor/) -->
+- [colorama](https://github.com/tartley/colorama)
 
 ### Stack Overflow
 - [certificate issue fix](https://stackoverflow.com/questions/52805115/certificate-verify-failed-unable-to-get-local-issuer-certificate)
