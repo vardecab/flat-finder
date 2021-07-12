@@ -17,6 +17,7 @@ output/*
 !output/.gitkeep
 data
 scraper.ipynb
+run-locations/*
 
 # images
 images/*.jpg

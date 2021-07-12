@@ -16,7 +16,7 @@
 - Artificial intelligence (AI) model to assess if an aparment is modern or not
 - IFTTT (eg. send an email or add a to-do task if new offer is found)
 - Cross platform (macOS & Windows)
-- Native notifications (maCOS & Windows)
+- Native notifications (macOS & Windows)
 
 ## How to use
 
@@ -28,6 +28,8 @@ Coming soon™.
 
 ## Release History
 
+- 0.14: Refactored code; moved some more code to functions; added support for more than one URL with offers (eg. useful w/ multiple locations); tried to achieve feature parity between Windows and macOS; improved model accuracy; changed comparison mode so that previously seen offers are not shown again; cleaner output / general look & feel; removed unused code; other small improvements. 
+- 0.13: Open folders for manual review of the images.
 - 0.12: Added `colorama` to have colored output; changed URL; added more images to model's dataset; added fix for `feedModel.py` crashing due to duplicates found in target location.
 - 0.11.3: Forced to look only on 3 subpages.
 - 0.11.2: Increased # of epochs to improve model's accuracy; added more images to model's dataset.
