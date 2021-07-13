@@ -31,7 +31,6 @@ images/*
 
 # model
 run.ipynb
-run.py
 fastai
 saved_model
 tensorflow

@@ -28,6 +28,7 @@ Coming soon™.
 
 ## Release History
 
+- 0.14.1: Added two additional calculations to know how much time it takes to train the model and how much time it takes to download and classify the images.
 - 0.14: Refactored code; moved some more code to functions; added support for more than one URL with offers (eg. useful w/ multiple locations); tried to achieve feature parity between Windows and macOS; improved model accuracy; changed comparison mode so that previously seen offers are not shown again; cleaner output / general look & feel; removed unused code; other small improvements. 
 - 0.13: Open folders for manual review of the images.
 - 0.12: Added `colorama` to have colored output; changed URL; added more images to model's dataset; added fix for `feedModel.py` crashing due to duplicates found in target location.
