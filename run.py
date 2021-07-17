@@ -641,13 +641,14 @@ try:
         if counterNewOffers <= 0: # should not fire 
             print(f"{Fore.YELLOW}\nNo new apartments since last run.") # colorama - yellow output
         else:
-            print(f"{Fore.YELLOW}\n{counterNewOffers} new apartments found since last run! Go check them now!") # colorama - yellow output
+            counterNewOffers = counterNewOffers - 1 # script is reading a new line as new offer so let's do a workaround 
+            print(f"{Fore.YELLOW}\n{counterNewOffers} new apartment(s) found since last run! Go check them now!") # colorama - yellow output
             if platform == "darwin":
                 # pync.notify(f'Nowe mieszkania: {counterNewOffers}', title='flat-finder', open=page_url, contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
                 pync.notify(f'Nowe mieszkania: {counterNewOffers}', title='flat-finder', contentImage="https://i.postimg.cc/XJskqPGH/apartment.png", sound="Funk") # appIcon="" doesn't work, using contentImage instead
             elif platform == "win32":
                 # toaster.show_toast(title="flat-finder", msg=f'Nowe mieszkania: {counterNewOffers}', icon_path="../../icons/apartment.png", duration=None, threaded=True, callback_on_click=open_url(page_url)) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
-                toaster.show_toast(title="flat-finder", msg=f'Nowe mieszkania: {counterNewOffers}', icon_path="icons/apartment.png", duration=None, threaded=True) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
+                toaster.show_toast(title="flat-finder", msg=f'Nowe mieszkania: {counterNewOffers}', icon_path="icons/apartment.ico", duration=None, threaded=True) # duration=None - leave notification in Notification Center; threaded=True - rest of the script will be allowed to be executed while the notification is still active
 
     else: # check if set is empty - if it is then there are no differences between files 
         print(f"{Fore.GREEN}\nFiles are the same.") # colorama - green output
