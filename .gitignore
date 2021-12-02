@@ -11,6 +11,7 @@ TODO
 .vscode
 __pycache__
 *.tmp
+data/getKey.py
 
 # files
 output/* 
