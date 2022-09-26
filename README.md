@@ -2,7 +2,7 @@
 
 ![Not Maintained](https://img.shields.io/badge/Maintenance%20Level-Not%20Maintained-yellow.svg)
 
-<b>Serious rewrite to [Selenium](https://www.selenium.dev) is needed because BeautifulSoup is struggling to download the whole page. This results in just 5-10% images downloaded.</b>
+<b>As of late 2022, serious rewrite from BeautifulSoup to [Selenium](https://www.selenium.dev) is needed because BeautifulSoup is struggling to download the whole page. This results in just 5-10% images downloaded.</b>
 
 <br>
 <hr>
