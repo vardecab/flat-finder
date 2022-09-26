@@ -1,5 +1,14 @@
 # flat-finder
 
+![Not Maintained](https://img.shields.io/badge/Maintenance%20Level-Not%20Maintained-yellow.svg)
+
+<b>Serious rewrite to [Selenium](https://www.selenium.dev) is needed because BeautifulSoup is struggling to download the whole page. This results in just 5-10% images downloaded.</b>
+
+<br>
+<hr>
+<br>
+<br>
+
 ![](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
 
 >Looking for a modern, nicely looking apartment but tired with all these old flats from the '90s? Let's automate that :) <br><br> Scrape apartment offers from OLX․pl, analyse them using artificial intelligence (AI) model to get only good looking flats and (optionally) run IFTTT automation (eg. send email; add a to-do task) when new offers matching search criteria (eg. ≥ 2 rooms, ≤ 2k PLN, ≥ 30m²) are found. <br><br> With support for native macOS & Windows 10 notifications. 
